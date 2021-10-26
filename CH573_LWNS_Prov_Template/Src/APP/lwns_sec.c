@@ -38,7 +38,7 @@ void lwns_sec_init(void){
             ,lwns_sec_key[12],lwns_sec_key[13],lwns_sec_key[14],lwns_sec_key[15]);
 }
 
-
+//加密消息，将src开始的mlen个字节数据，加密到to指向的内存空间。
 int lwns_msg_encrypt(u8 *src,u8 *to,u8 mlen){
     unsigned short i = 0;
     unsigned char esrc[16] = {0};
@@ -57,6 +57,7 @@ int lwns_msg_encrypt(u8 *src,u8 *to,u8 mlen){
     return i;//返回加密后数据长度
 }
 
+//解密消息，将src开始的mlen个字节数据，解密到to指向的内存空间。
 int lwns_msg_decrypt(u8 *src,u8 *to,u8 mlen){//长度mlen必须为16的倍数
     unsigned short i = 0;
     while(1){

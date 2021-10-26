@@ -1,6 +1,7 @@
 /*
  *  lwns_adapter_blemesh_mac.c
  *  lwns适配器，适配不同的芯片和库：
+ *  最新更新和教程文档都在https://gitee.com/jiamai01/lwns/
    *    本文件提供了一种模仿ble_mesh发送接收的mac层协议
    *    存在并发数据发送的场景推荐使用本文件
    *    用户可以修改头文件中的宏定义来更改参数

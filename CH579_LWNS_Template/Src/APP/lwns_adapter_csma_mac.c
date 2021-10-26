@@ -1,5 +1,6 @@
 /*
  *  lwns_adapter_csma_mac.c
+ *  最新更新和教程文档都在https://gitee.com/jiamai01/lwns/
  *  lwns适配器，适配不同的芯片和库：
  *  本文件提供了一种模拟csma的简单的防碰撞mac层协议
  *  Created on: Jul 14, 2021

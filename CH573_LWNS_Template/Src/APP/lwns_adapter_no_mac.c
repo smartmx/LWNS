@@ -1,5 +1,6 @@
 /*
  *  lwns_adapter_no_mac.c
+ *  最新更新和教程文档都在https://gitee.com/jiamai01/lwns/
  *  lwns适配器，适配不同的芯片和库：
    *        本文件提供没有mac层管理的透传方式，适合星型网络并且同一时间只有一个设备进行通信的场景。
  *  Created on: Jul 14, 2021

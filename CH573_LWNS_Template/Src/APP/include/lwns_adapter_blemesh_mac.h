@@ -14,7 +14,7 @@ extern "C"
 #endif
 
 
-#define LWNS_USE_BLEMESH_MAC            0   //是否使能模仿blemesh的mac协议，注意只能使能一个mac层协议。
+#define LWNS_USE_BLEMESH_MAC            1   //是否使能模仿blemesh的mac协议，注意只能使能一个mac层协议。
 
 #if LWNS_USE_BLEMESH_MAC
 

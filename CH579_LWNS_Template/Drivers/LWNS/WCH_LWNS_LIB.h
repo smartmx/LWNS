@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT ********************************************
  * File Name         : WCH_LWNS_LIB.h
  * Author            : WCH
- * Version           : V1.40
- * Date              : 2021/10/18
+ * Version           : V1.50
+ * Date              : 2021/10/25
  * Description       : this file is a head file for WCH Lightweight Wireless Networking Stack.
  *********************************************************************************************/
 #ifndef _WCH_LWNS_LIB_H_
@@ -82,7 +82,7 @@ typedef signed short int16_t;
 #define CONST                         const
 #endif
 
-#define  VER_LWNS_FILE            "WCH_LWNS_LIB_V1.40"
+#define  VER_LWNS_FILE            "WCH_LWNS_LIB_V1.50"
 
 //@@***********************************************************************general definitions end
 
@@ -397,6 +397,40 @@ extern int lwns_buffer_load_data(const void *from, u16 len);
  * @return      the length of data be saved actually.
  */
 extern int lwns_buffer_save_data(void *to);
+
+/*******************************************************************************
+ * @fn          lwns_buffer_clear
+ *
+ * @brief       clear lwns_buffer data in lwns_buffer.
+ *
+ * input parameters
+ *
+ * @param       None.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
+extern void lwns_buffer_clear(void);
+
+/*******************************************************************************
+ * @fn          lwns_buffer_set_datalen
+ *
+ * @brief       set datalen of lwns_buffer data in lwns_buffer.can not over LWNS_DATA_SIZE.
+ *
+ * input parameters
+ *
+ * @param       len - the length of buffer data.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
+extern void lwns_buffer_set_datalen(u8 len);
 
 //@@***********************************************************************lwns_buffer definitions end
 
@@ -789,7 +823,7 @@ extern int lwns_unicast_send(lwns_controller_ptr h,
 //@@***********************************************************************lwns_ruc definitions begin
 
 //can not be modified
-#define LWNS_RUC_CONTROLLER_U32_SIZE    24
+#define LWNS_RUC_CONTROLLER_U32_SIZE    25
 typedef struct _lwns_ruc_controller_struct {
     u32 data[LWNS_RUC_CONTROLLER_U32_SIZE];
 } lwns_ruc_controller;
@@ -888,8 +922,8 @@ extern u8 lwns_ruc_is_busy(lwns_controller_ptr h);
  *
  * input parameters
  *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_ruc_controller,
- *                  which must be initialized by lwns_ruc_init.
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_ruc_controller or lwns_rucft_controller,
+ *                  which must be initialized by lwns_ruc_init/lwns_rucft_init.
  *
  * output parameters
  *
@@ -899,13 +933,32 @@ extern u8 lwns_ruc_is_busy(lwns_controller_ptr h);
  */
 extern void lwns_ruc_clean_info(lwns_controller_ptr h);
 
+/*******************************************************************************
+ * @fn          lwns_ruc_remove_an_info
+ *
+ * @brief       remove a sender info in lwns_ruc_controller.
+ *
+ * input parameters
+ *
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_ruc_controller or lwns_rucft_controller,
+ *                  which must be initialized by lwns_ruc_init/lwns_rucft_init.
+ * @param       sender - the addr of the sender node.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
+extern void lwns_ruc_remove_an_info(lwns_controller_ptr h, lwns_addr_t* sender);
+
 //@@***********************************************************************lwns_ruc definitions end
 
 //@@***********************************************************************lwns_rucft definitions begin
 //reliable unicast file transfer
 
 //can not be modified
-#define LWNS_RUCFT_CONTROLLER_U32_SIZE    34
+#define LWNS_RUCFT_CONTROLLER_U32_SIZE    35
 typedef struct _lwns_rucft_controller_struct {
     u32 data[LWNS_RUCFT_CONTROLLER_U32_SIZE];
 } lwns_rucft_controller;
@@ -992,7 +1045,7 @@ extern int lwns_rucft_send(lwns_controller_ptr h,
 //@@***********************************************************************lwns_netflood definitions begin
 
 //can not be modified
-#define LWNS_NETFLOOD_CONTROLLER_U32_SIZE    29
+#define LWNS_NETFLOOD_CONTROLLER_U32_SIZE    31
 typedef struct _lwns_netflood_controller_struct {
     u32 data[LWNS_NETFLOOD_CONTROLLER_U32_SIZE];
 } lwns_netflood_controller;
@@ -1087,6 +1140,25 @@ extern int lwns_netflood_send(lwns_controller_ptr h);
 extern void lwns_netflood_clean_info(lwns_controller_ptr h);
 
 /*******************************************************************************
+ * @fn          lwns_netflood_remove_an_info
+ *
+ * @brief       remove a sender info in lwns_netflood_controller.
+ *
+ * input parameters
+ *
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/lwns_uninetflood_controller/lwns_multinetflood_controller,
+ *                  which must be initialized by these controller.
+ * @param       sender - the addr of the sender node.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
+extern void lwns_netflood_remove_an_info(lwns_controller_ptr h, lwns_addr_t* sender);
+
+/*******************************************************************************
  * @fn          lwns_netflood_seqno_set
  *
  * @brief       set seqno of the lwns_netflood_controller.
@@ -1112,7 +1184,7 @@ extern void lwns_netflood_seqno_set(lwns_controller_ptr h,u8 seqno);
 //based on netflood
 
 //can not be modified
-#define LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE    31
+#define LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE    33
 typedef struct _lwns_uninetflood_controller_struct {
     u32 data[LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE];
 } lwns_uninetflood_controller;
@@ -1195,7 +1267,7 @@ extern int lwns_uninetflood_send(lwns_controller_ptr h, lwns_addr_t *dst);
 //@@***********************************************************************lwns_multinetflood definitions begin
 
 //can not be modified
-#define LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE    32
+#define LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE    34
 typedef struct _lwns_multinetflood_controller_struct {
     u32 data[LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE];
 } lwns_multinetflood_controller;
@@ -1431,7 +1503,7 @@ extern int lwns_route_num(void);
 //@@***********************************************************************lwns_mesh definitions begin
 
 //can not be modified
-#define LWNS_MESH_CONTROLLER_U32_SIZE    54
+#define LWNS_MESH_CONTROLLER_U32_SIZE    56
 typedef struct _lwns_mesh_controller_struct {
     u32 data[LWNS_MESH_CONTROLLER_U32_SIZE];
 } lwns_mesh_controller;
@@ -1531,6 +1603,25 @@ extern int lwns_mesh_send(lwns_controller_ptr h,
  * @return      None.
  */
 extern void lwns_mesh_clean_routing_info(lwns_controller_ptr h);
+
+/*******************************************************************************
+ * @fn          lwns_mesh_remove_a_routing_info
+ *
+ * @brief       remove a routing sender info in lwns_mesh_controller.
+ *
+ * input parameters
+ *
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_mesh_controller,
+ *                  which must be initialized by lwns_mesh_init.
+ * @param       sender - the addr of the sender node.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
+extern void lwns_mesh_remove_a_routing_info(lwns_controller_ptr h, lwns_addr_t* sender);
 
 /*******************************************************************************
  * @fn          lwns_mesh_set_routing_seqno

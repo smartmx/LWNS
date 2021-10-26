@@ -11,6 +11,7 @@
 #include "WCH_LWNS_LIB.h"
 
 int lwns_msg_encrypt(u8* src,u8 * to,u8 mlen);
+
 int lwns_msg_decrypt(u8* src,u8 * to,u8 mlen);
 
 #endif /* _LWNS_SEC_H_ */
