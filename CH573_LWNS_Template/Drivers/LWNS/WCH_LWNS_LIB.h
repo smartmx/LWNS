@@ -1,8 +1,8 @@
 /********************************** (C) COPYRIGHT ********************************************
  * File Name         : WCH_LWNS_LIB.h
  * Author            : WCH
- * Version           : V1.50
- * Date              : 2021/10/25
+ * Version           : V1.60
+ * Date              : 2021/11/22
  * Description       : this file is a head file for WCH Lightweight Wireless Networking Stack.
  *********************************************************************************************/
 #ifndef _WCH_LWNS_LIB_H_
@@ -13,76 +13,25 @@ extern "C"
 {
 #endif
 
+#include "stdint.h"
+#include "stddef.h"
+
 //@@***********************************************************************general definitions begin
 
-#ifndef int8
-typedef signed char int8;
-#endif
-#ifndef int16
-typedef short int16;
-#endif
+#define  VER_LWNS_FILE                  "WCH_LWNS_LIB_V1.60"
+
 #ifndef BOOL
-typedef unsigned char BOOL;
-#endif
-#ifndef s8
-typedef signed char s8;
-#endif
-#ifndef s16
-typedef signed short s16;
-#endif
-#ifndef s32
-typedef signed long s32;
-#endif
-#ifndef u8
-typedef unsigned char u8;
-#endif
-#ifndef u16
-typedef unsigned short u16;
-#endif
-#ifndef u32
-typedef unsigned long u32;
-#endif
-#ifndef u64
-typedef unsigned long long u64;
-#endif
-#ifndef u8C
-typedef const unsigned char u8C;
-#endif
-#ifndef u32V
-typedef unsigned long volatile u32V;
-#endif
-#ifndef uint8
-typedef unsigned char uint8;
-#endif
-#ifndef uint16
-typedef unsigned short uint16;
-#endif
-#ifndef uint32
-typedef unsigned long uint32;
-#endif
-#ifndef int8_t
-typedef signed char int8_t;
-#endif
-#ifndef int16_t
-typedef signed short int16_t;
+typedef unsigned char                   BOOL;
 #endif
 #ifndef TRUE
-#define TRUE                          1
+#define TRUE                            1
 #endif
 #ifndef FALSE
-#define FALSE                         0
+#define FALSE                           0
 #endif
 #ifndef NULL
-#define NULL                          0
+#define NULL                            0
 #endif
-#ifndef VOID
-#define VOID                          void
-#endif
-#ifndef  CONST
-#define CONST                         const
-#endif
-
-#define  VER_LWNS_FILE            "WCH_LWNS_LIB_V1.50"
 
 //@@***********************************************************************general definitions end
 
@@ -91,7 +40,7 @@ typedef signed short int16_t;
 //can not be modified
 #define LWNS_ADDR_SIZE 6
 typedef union {
-    unsigned char u8[LWNS_ADDR_SIZE];
+    uint8_t v8[LWNS_ADDR_SIZE];
 } lwns_addr_t;
 
 /*******************************************************************************
@@ -170,15 +119,15 @@ extern void lwns_htimer_update(void);
 //can not be modified
 #define LWNS_NEIGHBOR_LIST_U8_SIZE    13
 typedef struct _lwns_neighbor_list_struct {
-    u8 data[LWNS_NEIGHBOR_LIST_U8_SIZE];
+    uint8_t data[LWNS_NEIGHBOR_LIST_U8_SIZE];
 } lwns_neighbor_list_t; //for user manual allocate
 
 struct lwns_neighbor_info
 {
     struct lwns_neighbor_info *next;
     lwns_addr_t sender;
-    u8 seqno;
-    u8 time;
+    uint8_t seqno;
+    uint8_t time;
 };
 
 typedef enum {
@@ -201,7 +150,7 @@ typedef enum {
  *
  * input parameters
  *
- * @param       status,u8 type,value is in LWNS_NEIGHBOR_AUTO_ADD_STATE_t.
+ * @param       status,uint8_t type,value is defined in LWNS_NEIGHBOR_AUTO_ADD_STATE_t.
  *
  * output parameters
  *
@@ -209,7 +158,7 @@ typedef enum {
  *
  * @return      None.
  */
-extern void lwns_neighbor_mode_set(u8 mode);
+extern void lwns_neighbor_mode_set(uint8_t mode);
 
 /*******************************************************************************
  * @fn          lwns_neighbor_lookup
@@ -260,7 +209,7 @@ extern int lwns_neighbor_add(const lwns_addr_t *sender);
  *
  * @return      NULL if not find, other is the pointer to the neighbor info.
  */
-extern struct lwns_neighbor_info *lwns_neighbor_get(u16 num);
+extern struct lwns_neighbor_info *lwns_neighbor_get(uint16_t num);
 
 /*******************************************************************************
  * @fn          lwns_neighbor_flush_all
@@ -326,7 +275,7 @@ extern void lwns_neighbor_remove(struct lwns_neighbor_info *e);
 //can not be modified
 #define LWNS_QBUF_LIST_U8_SIZE    273
 typedef struct _lwns_qbuf_ptr_struct {
-    u8 data[LWNS_QBUF_LIST_U8_SIZE];
+    uint8_t data[LWNS_QBUF_LIST_U8_SIZE];
 } lwns_qbuf_list_t; //for user manual allocate
 
 /*******************************************************************************
@@ -344,7 +293,7 @@ typedef struct _lwns_qbuf_ptr_struct {
  *
  * @return      data length in buffer
  */
-extern u16 lwns_buffer_datalen(void);
+extern uint16_t lwns_buffer_datalen(void);
 
 /*******************************************************************************
  * @fn          lwns_buffer_dataptr
@@ -379,7 +328,7 @@ extern void *lwns_buffer_dataptr(void);
  *
  * @return      the length of data be load to lwns_buffer actually.
  */
-extern int lwns_buffer_load_data(const void *from, u16 len);
+extern int lwns_buffer_load_data(const void *from, uint16_t len);
 
 /*******************************************************************************
  * @fn          lwns_buffer_save_data
@@ -430,7 +379,7 @@ extern void lwns_buffer_clear(void);
  *
  * @return      None.
  */
-extern void lwns_buffer_set_datalen(u8 len);
+extern void lwns_buffer_set_datalen(uint8_t len);
 
 //@@***********************************************************************lwns_buffer definitions end
 
@@ -441,25 +390,25 @@ typedef void* lwns_controller_ptr;
 
 //must fill it with user function.
 typedef struct _lwns_fuc_interface {
-    BOOL (*lwns_phy_output)(u8 *dataptr, u8 len);
-    u32 (*lwns_rand)(void);
-    void (*lwns_memcpy)(void *dst, const void *src, u32 len);
-    void (*lwns_memset)(void * pDst, u8 Value, u32 len);
-    BOOL (*lwns_memcmp)(const void *src1, const void *src2, u32 len);
+    BOOL (*lwns_phy_output)(uint8_t *dataptr, uint8_t len);
+    uint32_t (*lwns_rand)(void);
+    void (*lwns_memcpy)(void *dst, const void *src, uint32_t len);
+    void (*lwns_memset)(void * pDst, uint8_t Value, uint32_t len);
+    BOOL (*lwns_memcmp)(const void *src1, const void *src2, uint32_t len);//return TRUE if same,FALSE not.
     void (*new_neighbor_callback)(lwns_addr_t *n);
 } lwns_fuc_interface_t;
 
 //config params during init process.
 typedef struct _lwns_config {
     void* lwns_lib_name;
-    void* qbuf_ptr; //qbuf_buffer pointer.use lwns_qbuf_ptr_t to defined memory block.
+    void* qbuf_ptr; //qbuf_buffer pointer.use lwns_qbuf_ptr_t to define memory block.
     void* neighbor_list_ptr;
     void* routetable_ptr; //route table of entry pointer,if you want use mesh,must initialize it.use lwns_route_entry_data_t to defined memory block.
     lwns_addr_t addr;
-    u16 routetable_num; //max route table of entry number.if you want use mesh,it cannot be 0.
-    u8 qbuf_num; //max qbuf_buffer numbers.can not be 0.At least 1.
-    u8 neighbor_num;
-    u8 neighbor_mod;
+    uint16_t routetable_num; //max route table of entry number.if you want use mesh,it cannot be 0.
+    uint8_t qbuf_num; //max qbuf_buffer numbers.can not be 0.At least 1.
+    uint8_t neighbor_num;
+    uint8_t neighbor_mod;
 } lwns_config_t;
 
 //errors when init lwns_lib.
@@ -528,7 +477,7 @@ extern void lwns_lib_deInit(void);
  *
  * @return      None.
  */
-extern void lwns_input(u8 *rxBuf, u8 len);
+extern void lwns_input(uint8_t *rxBuf, uint8_t len);
 
 /*******************************************************************************
  * @fn          lwns_dataHandler
@@ -560,9 +509,9 @@ extern void lwns_dataHandler(void);
  *
  * @param       None.
  *
- * @return      u8,return port number of the lwns_controller_ptr.
+ * @return      uint8_t,return port number of the lwns_controller_ptr.
  */
-extern u8 get_lwns_object_port(lwns_controller_ptr controller);
+extern uint8_t get_lwns_object_port(lwns_controller_ptr controller);
 
 /*******************************************************************************
  * @fn          lwns_controller_lookup
@@ -571,7 +520,7 @@ extern u8 get_lwns_object_port(lwns_controller_ptr controller);
  *
  * input parameters
  *
- * @param       port_num  - u8.
+ * @param       port_num  - uint8_t.
  *
  * output parameters
  *
@@ -579,7 +528,7 @@ extern u8 get_lwns_object_port(lwns_controller_ptr controller);
  *
  * @return      lwns_controller_ptr,return the lwns_controller_ptr of this port number.
  */
-extern lwns_controller_ptr lwns_controller_lookup(u8 port_num);
+extern lwns_controller_ptr lwns_controller_lookup(uint8_t port_num);
 
 /*******************************************************************************
  * @fn          lwns_controller_pop
@@ -607,7 +556,7 @@ extern lwns_controller_ptr lwns_controller_pop(void);
 //can not be modified
 #define LWNS_BROADCAST_CONTROLLER_U32_SIZE    4
 typedef struct _lwns_broadcast_controller_struct {
-    u32 data[LWNS_BROADCAST_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_BROADCAST_CONTROLLER_U32_SIZE];
 } lwns_broadcast_controller;
 
 struct lwns_broadcast_callbacks {
@@ -623,7 +572,7 @@ struct lwns_broadcast_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_broadcast_controller
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       callbacks defined with lwns_broadcast_callbacks
  *
  * output parameters
@@ -632,7 +581,7 @@ struct lwns_broadcast_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_broadcast_init(lwns_controller_ptr h, u8 lwns_port,
+extern int lwns_broadcast_init(lwns_controller_ptr h, uint8_t port_num,
         const struct lwns_broadcast_callbacks *u);
 
 /*******************************************************************************
@@ -676,13 +625,13 @@ extern int lwns_broadcast_send(lwns_controller_ptr h);
 //@@***********************************************************************lwns_multicast definitions begin
 
 //can not be modified
-#define LWNS_MULTICAST_CONTROLLER_U32_SIZE    7
+#define LWNS_MULTICAST_CONTROLLER_U32_SIZE    6
 typedef struct _lwns_multicast_controller_struct {
-    u32 data[LWNS_MULTICAST_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_MULTICAST_CONTROLLER_U32_SIZE];
 } lwns_multicast_controller;
 
 struct lwns_multicast_callbacks {
-    void (*recv)(lwns_controller_ptr ptr,u16 subaddr, const lwns_addr_t *sender);
+    void (*recv)(lwns_controller_ptr ptr,uint16_t subaddr, const lwns_addr_t *sender);
     void (*sent)(lwns_controller_ptr ptr);
 };
 
@@ -694,7 +643,7 @@ struct lwns_multicast_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_multicast_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       subaddr      - the array pointer of subscribe addresses.
  * @param       sub_num      - the number of subscribe addresses.
  * @param       callbacks defined with lwns_multicast_callbacks
@@ -705,8 +654,8 @@ struct lwns_multicast_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_multicast_init(lwns_controller_ptr h, u8 lwns_port,
-        u16 *subaddr ,u8 sub_num, const struct lwns_multicast_callbacks *u);
+extern int lwns_multicast_init(lwns_controller_ptr h, uint8_t port_num,
+        uint16_t *subaddr ,uint8_t sub_num, const struct lwns_multicast_callbacks *u);
 
 /*******************************************************************************
  * @fn          lwns_multicast_close
@@ -743,7 +692,7 @@ extern void lwns_multicast_close(lwns_controller_ptr h);
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_multicast_send(lwns_controller_ptr h, u16 subaddr);
+extern int lwns_multicast_send(lwns_controller_ptr h, uint16_t subaddr);
 
 //@@***********************************************************************lwns_multicast definitions end
 
@@ -752,7 +701,7 @@ extern int lwns_multicast_send(lwns_controller_ptr h, u16 subaddr);
 //can not be modified
 #define LWNS_UNICAST_CONTROLLER_U32_SIZE    5
 typedef struct _lwns_unicast_controller_struct {
-    u32 data[LWNS_UNICAST_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_UNICAST_CONTROLLER_U32_SIZE];
 } lwns_unicast_controller;
 
 struct lwns_unicast_callbacks {
@@ -768,7 +717,7 @@ struct lwns_unicast_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_unicast_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       callbacks defined with lwns_unicast_callbacks
  *
  * output parameters
@@ -777,7 +726,7 @@ struct lwns_unicast_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_unicast_init(lwns_controller_ptr h, u8 lwns_port,
+extern int lwns_unicast_init(lwns_controller_ptr h, uint8_t port_num,
         const struct lwns_unicast_callbacks *u);
 
 /*******************************************************************************
@@ -825,14 +774,14 @@ extern int lwns_unicast_send(lwns_controller_ptr h,
 //can not be modified
 #define LWNS_RUC_CONTROLLER_U32_SIZE    25
 typedef struct _lwns_ruc_controller_struct {
-    u32 data[LWNS_RUC_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_RUC_CONTROLLER_U32_SIZE];
 } lwns_ruc_controller;
 
 //reliable unicast
 struct lwns_ruc_callbacks {
     void (*recv)(lwns_controller_ptr ptr, const lwns_addr_t *sender);
     void (*sent)(lwns_controller_ptr ptr, const lwns_addr_t *to,
-            u8 retransmissions);
+            uint8_t retransmissions);
     void (*timedout)(lwns_controller_ptr ptr, const lwns_addr_t *to);
 };
 
@@ -844,7 +793,7 @@ struct lwns_ruc_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_ruc_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       retransmit_time  if dest node not give ack,we will retry to send message after this retransmit_time time.
  * @param       callbacks defined with lwns_ruc_callbacks
  *
@@ -854,7 +803,7 @@ struct lwns_ruc_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_ruc_init(lwns_controller_ptr h, u8 lwns_port,
+extern int lwns_ruc_init(lwns_controller_ptr h, uint8_t port_num,
         lwns_clock_time_t retransmit_time,
         const struct lwns_ruc_callbacks *u);
 
@@ -895,7 +844,7 @@ extern void lwns_ruc_close(lwns_controller_ptr h);
  * @return      return 1 if success,0 if failed.
  */
 extern int lwns_ruc_send(lwns_controller_ptr h,
-        const lwns_addr_t *receiver, u8 max_retransmissions);
+        const lwns_addr_t *receiver, uint8_t max_retransmissions);
 
 /*******************************************************************************
  * @fn          lwns_ruc_is_busy
@@ -913,7 +862,7 @@ extern int lwns_ruc_send(lwns_controller_ptr h,
  *
  * @return      return 1 if busy,0 if free.
  */
-extern u8 lwns_ruc_is_busy(lwns_controller_ptr h);
+extern uint8_t lwns_ruc_is_busy(lwns_controller_ptr h);
 
 /*******************************************************************************
  * @fn          lwns_ruc_clean_info
@@ -960,14 +909,13 @@ extern void lwns_ruc_remove_an_info(lwns_controller_ptr h, lwns_addr_t* sender);
 //can not be modified
 #define LWNS_RUCFT_CONTROLLER_U32_SIZE    35
 typedef struct _lwns_rucft_controller_struct {
-    u32 data[LWNS_RUCFT_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_RUCFT_CONTROLLER_U32_SIZE];
 } lwns_rucft_controller;
 
 struct lwns_rucft_callbacks {
     void (*write_file)(lwns_controller_ptr ptr, const lwns_addr_t *sender,
             int offset, int flag, char *data, int len);
-    int (*read_file)(lwns_controller_ptr ptr, int offset, char *to,
-            int maxsize);
+    int (*read_file)(lwns_controller_ptr ptr, int offset, char *to);
     void (*timedout)(lwns_controller_ptr ptr);
 };
 
@@ -987,7 +935,7 @@ enum {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_rucft_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       retransmit_time  if dest node not give ack,we will retry to send message after this retransmit_time time.
  * @param       max_retransmissions - if the dest not give ack,we will retry for this set value times.
  * @param       callbacks defined with lwns_rucft_callbacks.
@@ -998,8 +946,8 @@ enum {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_rucft_init(lwns_controller_ptr h, u8 lwns_port,
-        lwns_clock_time_t retransmit_time, u8 max_retransmissions,
+extern int lwns_rucft_init(lwns_controller_ptr h, uint8_t port_num,
+        lwns_clock_time_t retransmit_time, uint8_t max_retransmissions,
         const struct lwns_rucft_callbacks *u);
 
 /*******************************************************************************
@@ -1047,12 +995,12 @@ extern int lwns_rucft_send(lwns_controller_ptr h,
 //can not be modified
 #define LWNS_NETFLOOD_CONTROLLER_U32_SIZE    31
 typedef struct _lwns_netflood_controller_struct {
-    u32 data[LWNS_NETFLOOD_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_NETFLOOD_CONTROLLER_U32_SIZE];
 } lwns_netflood_controller;
 
 struct lwns_netflood_callbacks {
     int (*recv)(lwns_controller_ptr ptr, const lwns_addr_t *from,
-            const lwns_addr_t *originator, u8 hops);
+            const lwns_addr_t *originator, uint8_t hops);
     void (*sent)(lwns_controller_ptr ptr);
     void (*dropped)(lwns_controller_ptr ptr);
 };
@@ -1065,7 +1013,7 @@ struct lwns_netflood_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       queue_time - wait queue_time/2  with a random time to receive message.
  * @param       dups - cannot be 0,if this value is set to over 1,this controller will wait to receive the same message over this value,and then drop the message.
  * @param       hops - the message max transmit life time.when another node send this message,this value will -1 until it is 0.
@@ -1081,9 +1029,9 @@ struct lwns_netflood_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_netflood_init(lwns_controller_ptr h, u8 lwns_port,
-        lwns_clock_time_t queue_time, u8 dups, u8 hops, u8 drop_old_packet,
-        u8 old_phase_value, const struct lwns_netflood_callbacks *u);
+extern int lwns_netflood_init(lwns_controller_ptr h, uint8_t port_num,
+        lwns_clock_time_t queue_time, uint8_t dups, uint8_t hops, uint8_t drop_old_packet,
+        uint8_t old_phase_value, const struct lwns_netflood_callbacks *u);
 
 /*******************************************************************************
  * @fn          lwns_netflood_close
@@ -1128,8 +1076,9 @@ extern int lwns_netflood_send(lwns_controller_ptr h);
  *
  * input parameters
  *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/lwns_uninetflood_controller/lwns_multinetflood_controller,
- *                  which must be initialized by these controller.
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/
+ *                  lwns_uninetflood_controller/lwns_multinetflood_controller/lwns_mesh_controller,
+ *                  which must be initialized by these controller init function.
  *
  * output parameters
  *
@@ -1146,8 +1095,9 @@ extern void lwns_netflood_clean_info(lwns_controller_ptr h);
  *
  * input parameters
  *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/lwns_uninetflood_controller/lwns_multinetflood_controller,
- *                  which must be initialized by these controller.
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/
+ *                  lwns_uninetflood_controller/lwns_multinetflood_controller/lwns_mesh_controller,
+ *                  which must be initialized by these controller init function.
  * @param       sender - the addr of the sender node.
  *
  * output parameters
@@ -1165,8 +1115,9 @@ extern void lwns_netflood_remove_an_info(lwns_controller_ptr h, lwns_addr_t* sen
  *
  * input parameters
  *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/lwns_uninetflood_controller/lwns_multinetflood_controller,
- *                  which must be initialized by these controller.
+ * @param       h - lwns_controller_ptr,the pointer of a lwns_netflood_controller/
+ *                  lwns_uninetflood_controller/lwns_multinetflood_controller/lwns_mesh_controller,
+ *                  which must be initialized by these controller init function.
  * @param       seqno    -value:(0-255)   - seqno need to set.
  *
  * output parameters
@@ -1175,7 +1126,7 @@ extern void lwns_netflood_remove_an_info(lwns_controller_ptr h, lwns_addr_t* sen
  *
  * @return      return 1 if busy,0 if free.
  */
-extern void lwns_netflood_seqno_set(lwns_controller_ptr h,u8 seqno);
+extern void lwns_netflood_seqno_set(lwns_controller_ptr h,uint8_t seqno);
 
 //@@***********************************************************************lwns_netflood definitions end
 
@@ -1184,13 +1135,13 @@ extern void lwns_netflood_seqno_set(lwns_controller_ptr h,u8 seqno);
 //based on netflood
 
 //can not be modified
-#define LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE    33
+#define LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE    32
 typedef struct _lwns_uninetflood_controller_struct {
-    u32 data[LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_UNINETFLOOD_CONTROLLER_U32_SIZE];
 } lwns_uninetflood_controller;
 
 struct lwns_uninetflood_callbacks {
-    void (*recv)(lwns_controller_ptr ptr, const lwns_addr_t *sender, u8 hops);
+    void (*recv)(lwns_controller_ptr ptr, const lwns_addr_t *sender, uint8_t hops);
     void (*sent)(lwns_controller_ptr ptr);
 };
 
@@ -1202,7 +1153,7 @@ struct lwns_uninetflood_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_uninetflood_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       queue_time - wait queue_time/2  with a random time to receive message.
  * @param       dups - cannot be 0,if this value is set to over 1,
  *                     this controller will wait to receive the same message over this value,
@@ -1221,9 +1172,9 @@ struct lwns_uninetflood_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_uninetflood_init(lwns_controller_ptr h, u8 lwns_port,
-        lwns_clock_time_t queue_time, u8 dups, u8 hops, u8 drop_old_packet,u8 old_phase_value,
-        u8 flood_choice, const struct lwns_uninetflood_callbacks *u);
+extern int lwns_uninetflood_init(lwns_controller_ptr h, uint8_t port_num,
+        lwns_clock_time_t queue_time, uint8_t dups, uint8_t hops, uint8_t drop_old_packet,uint8_t old_phase_value,
+        uint8_t flood_choice, const struct lwns_uninetflood_callbacks *u);
 
 /*******************************************************************************
  * @fn          lwns_uninetflood_close
@@ -1267,13 +1218,13 @@ extern int lwns_uninetflood_send(lwns_controller_ptr h, lwns_addr_t *dst);
 //@@***********************************************************************lwns_multinetflood definitions begin
 
 //can not be modified
-#define LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE    34
+#define LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE    33
 typedef struct _lwns_multinetflood_controller_struct {
-    u32 data[LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_MULTINETFLOOD_CONTROLLER_U32_SIZE];
 } lwns_multinetflood_controller;
 
 struct lwns_multinetflood_callbacks {
-    void (*recv)(lwns_controller_ptr ptr,u16 subaddr, const lwns_addr_t *sender, u8 hops);
+    void (*recv)(lwns_controller_ptr ptr,uint16_t subaddr, const lwns_addr_t *sender, uint8_t hops);
     void (*sent)(lwns_controller_ptr ptr);
 };
 
@@ -1285,7 +1236,7 @@ struct lwns_multinetflood_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_uninetflood_controller.
- * @param       lwns_port    -value:(1-255)   - port to recognize data
+ * @param       port_num    -value:(1-255)   - port to recognize data
  * @param       queue_time - wait queue_time/2  with a random time to receive message.
  * @param       dups - cannot be 0,if this value is set to over 1,
  *                     this controller will wait to receive the same message over this value,
@@ -1307,9 +1258,9 @@ struct lwns_multinetflood_callbacks {
  * @return      return 1 if success,0 if failed.
  */
 extern int lwns_multinetflood_init(lwns_controller_ptr h,
-        u8 lwns_port, lwns_clock_time_t queue_time,
-        u8 dups, u8 hops,u8 drop_old_packet,u8 old_phase_value,u8 flood_choice,
-        u16 *subaddr ,u8 sub_num,
+        uint8_t port_num, lwns_clock_time_t queue_time,
+        uint8_t dups, uint8_t hops,uint8_t drop_old_packet,uint8_t old_phase_value,uint8_t flood_choice,
+        uint16_t *subaddr ,uint8_t sub_num,
         const struct lwns_multinetflood_callbacks *u);
 
 /*******************************************************************************
@@ -1347,7 +1298,7 @@ extern void lwns_multinetflood_close(lwns_controller_ptr h);
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_multinetflood_send(lwns_controller_ptr h, u16 subaddr);
+extern int lwns_multinetflood_send(lwns_controller_ptr h, uint16_t subaddr);
 
 //@@***********************************************************************lwns_multinetflood definitions end
 
@@ -1359,15 +1310,15 @@ struct lwns_route_entry {
     struct lwns_route_entry *next;
     lwns_addr_t dest;
     lwns_addr_t nexthop;
-    u8 cost;
-    u8 time;
-    u8 disabled;
-    u8 lost;
+    uint8_t cost;
+    uint8_t time;
+    uint8_t disabled;
+    uint8_t lost;
 };
 
 #define LWNS_ROUTE_ENTRY_LIST_U8_SIZE    21
 typedef struct _lwns_route_entry_data_struct {
-    u8 data[LWNS_ROUTE_ENTRY_LIST_U8_SIZE];
+    uint8_t data[LWNS_ROUTE_ENTRY_LIST_U8_SIZE];
 } lwns_route_entry_data_t; //for user manual allocate
 
 /*******************************************************************************
@@ -1389,7 +1340,7 @@ typedef struct _lwns_route_entry_data_struct {
  *
  * @return      None.
  */
-extern void lwns_route_init(u8 route_entry_duplicate, u8 max_life_time,
+extern void lwns_route_init(uint8_t route_entry_duplicate, uint8_t max_life_time,
         lwns_clock_time_t periodic_time);
 
 /*******************************************************************************
@@ -1410,7 +1361,7 @@ extern void lwns_route_init(u8 route_entry_duplicate, u8 max_life_time,
  * @return      0 is success.
  */
 extern int lwns_route_add(const lwns_addr_t *dest,
-        const lwns_addr_t *nexthop, u8 cost);
+        const lwns_addr_t *nexthop, uint8_t cost);
 
 /*******************************************************************************
  * @fn          lwns_route_lookup
@@ -1503,15 +1454,15 @@ extern int lwns_route_num(void);
 //@@***********************************************************************lwns_mesh definitions begin
 
 //can not be modified
-#define LWNS_MESH_CONTROLLER_U32_SIZE    56
+#define LWNS_MESH_CONTROLLER_U32_SIZE    55
 typedef struct _lwns_mesh_controller_struct {
-    u32 data[LWNS_MESH_CONTROLLER_U32_SIZE];
+    uint32_t data[LWNS_MESH_CONTROLLER_U32_SIZE];
 } lwns_mesh_controller;
 
 //mesh functions must be used after you initialize route by lwns_route_init.
 struct lwns_mesh_callbacks {
     void (*recv)(lwns_controller_ptr ptr, const lwns_addr_t *sender,
-            u8 hops);
+            uint8_t hops);
     void (*sent)(lwns_controller_ptr ptr);
     void (*timedout)(lwns_controller_ptr ptr);
 };
@@ -1524,7 +1475,7 @@ struct lwns_mesh_callbacks {
  * input parameters
  *
  * @param       h - lwns_controller_ptr,the pointer of a lwns_mesh_controller.
- * @param       lwns_ports    -value:(1-255)  - port to recognize data,this controller will open 3 ports.so if you type in 128,then 128,129,130 port will be all opened.
+ * @param       port_nums    -value:(1-255)  - port to recognize data,this controller will open 3 ports.so if you type in 128,then 128,129,130 port will be all opened.
  * @param       route_discovery_hoptime - wait route_discovery_hoptime/2  with a random time to receive message.
  * @param       dups - cannot be 0,if this value is set to over 1,this controller will wait to receive the same message over this value,and then drop the message.
  * @param       hops - the message max transmit life time.when another node send this message,this value will -1 until it is 0.
@@ -1543,9 +1494,9 @@ struct lwns_mesh_callbacks {
  *
  * @return      return 1 if success,0 if failed.
  */
-extern int lwns_mesh_init(lwns_controller_ptr h, u8 lwns_ports,
-        lwns_clock_time_t route_discovery_hoptime, u8 dups, u8 hops,u8 rt_drop_old_packet,
-        u8 old_phase_value, u8 self_route_enable,u8 route_loop_add_enable,
+extern int lwns_mesh_init(lwns_controller_ptr h, uint8_t port_nums,
+        lwns_clock_time_t route_discovery_hoptime, uint8_t dups, uint8_t hops,uint8_t rt_drop_old_packet,
+        uint8_t old_phase_value, uint8_t self_route_enable,uint8_t route_loop_add_enable,
         lwns_clock_time_t mesh_over_time,
         const struct lwns_mesh_callbacks *callbacks);
 
@@ -1585,62 +1536,6 @@ extern void lwns_mesh_close(lwns_controller_ptr h);
  */
 extern int lwns_mesh_send(lwns_controller_ptr h,
         const lwns_addr_t *dest);
-
-/*******************************************************************************
- * @fn          lwns_mesh_clean_routing_info
- *
- * @brief       clean netflooed senders and seqno in mesh.
- *
- * input parameters
- *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_mesh_controller,
- *                  which must be initialized by lwns_mesh_init.
- *
- * output parameters
- *
- * @param       None.
- *
- * @return      None.
- */
-extern void lwns_mesh_clean_routing_info(lwns_controller_ptr h);
-
-/*******************************************************************************
- * @fn          lwns_mesh_remove_a_routing_info
- *
- * @brief       remove a routing sender info in lwns_mesh_controller.
- *
- * input parameters
- *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_mesh_controller,
- *                  which must be initialized by lwns_mesh_init.
- * @param       sender - the addr of the sender node.
- *
- * output parameters
- *
- * @param       None.
- *
- * @return      None.
- */
-extern void lwns_mesh_remove_a_routing_info(lwns_controller_ptr h, lwns_addr_t* sender);
-
-/*******************************************************************************
- * @fn          lwns_mesh_set_routing_seqno
- *
- * @brief       set seqno of the lwns_netflood_controller in mesh_controller.
- *
- * input parameters
- *
- * @param       h - lwns_controller_ptr,the pointer of a lwns_mesh_controller,
- *                  which must be initialized by lwns_mesh_init.
- * @param       seqno    -value:(0-255)   - seqno need to set.
- *
- * output parameters
- *
- * @param       None.
- *
- * @return      None.
- */
-extern void lwns_mesh_set_routing_seqno(lwns_controller_ptr h, u8 seqno);
 
 //@@***********************************************************************lwns_mesh definitions end
 

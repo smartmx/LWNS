@@ -59,10 +59,9 @@ static ef_env default_env_set[] = {
  */
 EfErrCode ef_port_init(ef_env **default_env, size_t *default_env_size) {
     EfErrCode result = EF_NO_ERR;
-
     *default_env = default_env_set;
     *default_env_size = sizeof(default_env_set) / sizeof(default_env_set[0]);
-
+    ef_print("ef_port_init\n");
     return result;
 }
 
@@ -79,11 +78,12 @@ EfErrCode ef_port_init(ef_env **default_env, size_t *default_env_size) {
 EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
     EfErrCode read_result = EF_NO_ERR;
     //ef_print("ef_port_read:%04x,%04x,%04x\n",addr,buf,size);
-    read_result = EEPROM_READ(addr, buf, size);
-    EF_ASSERT(read_result == 0);
-
+    if(EEPROM_READ(addr, buf, size) != 0){
+        read_result = EF_READ_ERR;
+    }
     return read_result;
 }
+
 
 /**
  * Erase data on flash.
@@ -98,13 +98,10 @@ EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
 EfErrCode ef_port_erase(uint32_t addr, size_t size) {
     EfErrCode ef_port_erase_result = EF_NO_ERR;
     size_t erase_pages, i;
-
     /* make sure the start address is a multiple of FLASH_ERASE_MIN_SIZE */
-    EF_ASSERT(addr % EF_ERASE_MIN_SIZE == 0);
     //ef_print("ef_port_erase:%04x,%04x\n", addr, size);
-    ef_port_erase_result = EEPROM_ERASE(addr, size);
-    EF_ASSERT(ef_port_erase_result == EF_NO_ERR);
-    if (ef_port_erase_result != EF_NO_ERR) {
+    EF_ASSERT(addr % EF_ERASE_MIN_SIZE == 0);
+    if(EEPROM_ERASE(addr, size) != 0){
         ef_port_erase_result = EF_ERASE_ERR;
     }
     return ef_port_erase_result;
@@ -122,24 +119,24 @@ EfErrCode ef_port_erase(uint32_t addr, size_t size) {
  */
 EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
     EfErrCode result = EF_NO_ERR;
-    EfErrCode write_result = EF_NO_ERR;
-    EfErrCode verify_result = EF_NO_ERR;
-    __attribute__((aligned(4)))   uint8_t wrbuf[EF_ERASE_MIN_SIZE];
-    if(size > 0){
-        //ef_print("ef_port_write:%04x,%04x,%04x\n", addr, buf, size);
-        if ((uint32_t) buf >= 0x20000000) {
-            write_result = EEPROM_WRITE(addr, (PVOID )buf, size);
-            EF_ASSERT(write_result == 0);
-        } else {
-            tmos_memcpy(wrbuf, buf, size); //get buffer
-            write_result = EEPROM_WRITE(addr, (PVOID )(wrbuf), size);
-            EF_ASSERT(write_result == 0);
-        }
-        EEPROM_READ(addr, wrbuf, size);
-        verify_result = tmos_memcmp(wrbuf, buf, size);
-        EF_ASSERT(verify_result == TRUE);
-        if (verify_result != TRUE || write_result != EF_NO_ERR) {
+    //ef_print("ef_port_write addr:%x,buf:%x,size:%d\n",addr,buf,size);
+    if((uint32_t)buf >= 0x20000000){
+        //data in ram
+        if(EEPROM_WRITE(addr, (void *)buf, size) != 0){
             result = EF_WRITE_ERR;
+        }
+    } else {
+        //data in flash
+        size_t  write_size = 0, write_once_size;
+        uint32_t write_data[(EF_ENV_NAME_MAX + 3)/4];//the name length is EF_ENV_NAME_MAX.name is the most possible being saved in rom.data always in ram.
+        while(write_size < size){
+            write_once_size = MIN(sizeof(write_data),size - write_size);//write size is sizeof(write_data) or less.
+            tmos_memcpy(write_data, (const void *)((uint32_t)buf + write_size), write_once_size);//copy data from flash to ram.
+            if(EEPROM_WRITE(addr + write_size, write_data, write_once_size) != 0){
+                result = EF_WRITE_ERR;
+                break;
+            }
+            write_size = write_size + write_once_size;
         }
     }
     return result;
@@ -174,7 +171,7 @@ void ef_log_debug(const char *file, const long line, const char *format, ...) {
     va_list args;
     /* args point to the first variable parameter */
     va_start(args, format);
-    PRINTF("[LOG](%s:%ld) ", file, line);
+    PRINTF("[DBG](%s:%ld) ", file, line);
     VPRINTF(format, args);
     PRINTF("\n");
     va_end(args);

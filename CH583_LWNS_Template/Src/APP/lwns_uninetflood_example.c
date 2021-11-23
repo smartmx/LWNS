@@ -1,16 +1,14 @@
 /*
  * lwns_uninetflood_example.c
-   *    Ê¹ÓÃĞèÒªÈ¥app_main.cÖĞÈ¡Ïû±¾Àı×Ó³õÊ¼»¯º¯ÊıµÄ×¢ÊÍ
-   *   µ¥²¥ÍøÂç·ººé´«ÊäÀı×Ó£¬½«Êı¾İÍøÂç·ººé·¢ËÍÖÁÖ¸¶¨½Úµã¡£
+ * Ê¹ÓÃĞèÒªÈ¥app_main.cÖĞÈ¡Ïû±¾Àı×Ó³õÊ¼»¯º¯ÊıµÄ×¢ÊÍ
+ * µ¥²¥ÍøÂç·ººé´«ÊäÀı×Ó£¬½«Êı¾İÍøÂç·ººé·¢ËÍÖÁÖ¸¶¨½Úµã¡£
  * uninetflood
- *  Created on: Jul 19, 2021
- *      Author: WCH
+ * Created on: Jul 19, 2021
+ * Author: WCH
  */
-
 #include "lwns_uninetflood_example.h"
-#include "CH58x_common.h"
-#include "config.h"
 
+//Ã¿¸öÎÄ¼şµ¥¶Àdebug´òÓ¡µÄ¿ª¹Ø£¬ÖÃ0¿ÉÒÔ½ûÖ¹±¾ÎÄ¼şÄÚ²¿´òÓ¡
 #define DEBUG_PRINT_IN_THIS_FILE 1
 #if DEBUG_PRINT_IN_THIS_FILE
 #define PRINTF(...) PRINT(__VA_ARGS__)
@@ -24,42 +22,73 @@ static lwns_addr_t dst_addr = { { 0xa3, 0xdf, 0x38, 0xe4, 0xc2, 0x84 } };//Ä¿±ê½
 static lwns_addr_t dst_addr = { { 0xd9, 0x37, 0x3c, 0xe4, 0xc2, 0x84 } };
 #endif
 
-static uint8 TX_DATA[LWNS_DATA_SIZE] = {0};//×î´ó³¤¶ÈÊı¾İÊÕ·¢²âÊÔ
-static uint8 RX_DATA[LWNS_DATA_SIZE] = {0};//×î´ó³¤¶ÈÊı¾İÊÕ·¢²âÊÔ
-static uint16 lwns_uninetflood_ProcessEvent(uint8 task_id, uint16 events);
+static uint8_t TX_DATA[LWNS_DATA_SIZE] = {0};//×î´ó³¤¶ÈÊı¾İÊÕ·¢²âÊÔ
+static uint8_t RX_DATA[LWNS_DATA_SIZE] = {0};//×î´ó³¤¶ÈÊı¾İÊÕ·¢²âÊÔ
+static uint16_t lwns_uninetflood_ProcessEvent(uint8_t task_id, uint16_t events);
 static void uninetflood_recv(lwns_controller_ptr ptr,const lwns_addr_t *sender, uint8_t hops);//µ¥²¥ÍøÂç·ººé½ÓÊÕ»Øµ÷º¯Êı
 static void uninetflood_sent(lwns_controller_ptr ptr);//µ¥²¥ÍøÂç·ººé·¢ËÍÍê³É»Øµ÷º¯Êı
 
 static lwns_uninetflood_controller uninetflood;//µ¥²¥ÍøÂç·ººé¿ØÖÆ½á¹¹Ìå
 
-static uint8 uninetflood_taskID;//µ¥²¥ÍøÂç·ººé¿ØÖÆÈÎÎñid
+static uint8_t uninetflood_taskID;//µ¥²¥ÍøÂç·ººé¿ØÖÆÈÎÎñid
 
+/*********************************************************************
+ * @fn      uninetflood_recv
+ *
+ * @brief   lwns uninetflood½ÓÊÕ»Øµ÷º¯Êı
+ *
+ * @param   ptr         -   ±¾´Î½ÓÊÕµ½µÄÊı¾İËùÊôµÄuninetflood¿ØÖÆ½á¹¹ÌåÖ¸Õë.
+ * @param   sender      -   ±¾´Î½ÓÊÕµ½µÄÊı¾İµÄ·¢ËÍÕßµØÖ·Ö¸Õë.
+ * @param   hops        -   ±¾´Î½ÓÊÕµ½µÄÊı¾İµÄ´Ó·¢ËÍ·½µ½±¾½Úµã¾­ÀúµÄÌøÊı.
+ *
+ * @return  None.
+ */
 static void uninetflood_recv(lwns_controller_ptr ptr,const lwns_addr_t *sender, uint8_t hops){
-    uint8 len;
+    uint8_t len;
     len = lwns_buffer_datalen(); //»ñÈ¡µ±Ç°»º³åÇø½ÓÊÕµ½µÄÊı¾İ³¤¶È
     lwns_buffer_save_data(RX_DATA); //½ÓÊÕÊı¾İµ½ÓÃ»§Êı¾İÇøÓò
     PRINTF("uninetflood %d rec from %02x %02x %02x %02x %02x %02x\n",
             get_lwns_object_port(ptr),
-            sender->u8[0], sender->u8[1], sender->u8[2], sender->u8[3],
-            sender->u8[4], sender->u8[5]);//fromÎª½ÓÊÕµ½µÄÊı¾İµÄ·¢ËÍ·½µØÖ·
+            sender->v8[0], sender->v8[1], sender->v8[2], sender->v8[3],
+            sender->v8[4], sender->v8[5]);//fromÎª½ÓÊÕµ½µÄÊı¾İµÄ·¢ËÍ·½µØÖ·
     PRINTF("data:");
-    for (uint8 i = 0; i < len; i++) {
+    for (uint8_t i = 0; i < len; i++) {
         PRINTF("%02x ", RX_DATA[i]);//´òÓ¡³öÊı¾İ
     }
     PRINTF("\n");
 }
 
+/*********************************************************************
+ * @fn      uninetflood_sent
+ *
+ * @brief   lwns uninetflood·¢ËÍÍê³É»Øµ÷º¯Êı
+ *
+ * @param   ptr     -   ±¾´Î·¢ËÍÍê³ÉµÄ¿É¿¿µ¥²¥¿ØÖÆ½á¹¹ÌåÖ¸Õë.
+ *
+ * @return  None.
+ */
 static void uninetflood_sent(lwns_controller_ptr ptr) {
     PRINTF("uninetflood %d sent\n",get_lwns_object_port(ptr));
 }
 
+/**
+ * lwns µ¥²¥ÍøÂç·ººé»Øµ÷º¯Êı½á¹¹Ìå£¬×¢²á»Øµ÷º¯Êı
+ */
 static const struct lwns_uninetflood_callbacks uninetflood_callbacks =
-{uninetflood_recv,uninetflood_sent};//×¢²áµ¥²¥ÍøÂç·ººé»Øµ÷º¯Êı
+{uninetflood_recv,uninetflood_sent};
 
-
+/*********************************************************************
+ * @fn      lwns_uninetflood_process_init
+ *
+ * @brief   lwns uninetfloodÀı³Ì³õÊ¼»¯.
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 void lwns_uninetflood_process_init(void) {
     uninetflood_taskID = TMOS_ProcessEventRegister(lwns_uninetflood_ProcessEvent);
-    for(uint8 i = 0; i < LWNS_DATA_SIZE ;i++){
+    for(uint8_t i = 0; i < LWNS_DATA_SIZE ;i++){
         TX_DATA[i]=i;
     }
     lwns_uninetflood_init(&uninetflood,
@@ -79,11 +108,24 @@ void lwns_uninetflood_process_init(void) {
             MS1_TO_SYSTEM_TIME(1000));
 }
 
-uint16 lwns_uninetflood_ProcessEvent(uint8 task_id, uint16 events) {
+/*********************************************************************
+ * @fn      lwns_uninetflood_ProcessEvent
+ *
+ * @brief   lwns uninetflood Task event processor.  This function
+ *          is called to process all events for the task.  Events
+ *          include timers, messages and any other user defined events.
+ *
+ * @param   task_id - The TMOS assigned task ID.
+ * @param   events - events to process.  This is a bit map and can
+ *                   contain more than one event.
+ *
+ * @return  events not processed.
+ */
+uint16_t lwns_uninetflood_ProcessEvent(uint8_t task_id, uint16_t events) {
     if (events & UNINETFLOOD_EXAMPLE_TX_PERIOD_EVT) {
-       uint8 temp;
+       uint8_t temp;
        temp = TX_DATA[0];
-       for (uint8 i = 0; i < 9; i++) {
+       for (uint8_t i = 0; i < 9; i++) {
            TX_DATA[i] = TX_DATA[i + 1];//ÒÆÎ»·¢ËÍÊı¾İ£¬ÒÔ±ã¹Û²ìĞ§¹û
        }
        TX_DATA[9] = temp;
@@ -95,7 +137,7 @@ uint16 lwns_uninetflood_ProcessEvent(uint8 task_id, uint16 events) {
    }
 
     if (events & SYS_EVENT_MSG) {
-        uint8 *pMsg;
+        uint8_t *pMsg;
         if ((pMsg = tmos_msg_receive(task_id)) != NULL) {
             // Release the TMOS message
             tmos_msg_deallocate(pMsg);
@@ -106,4 +148,5 @@ uint16 lwns_uninetflood_ProcessEvent(uint8 task_id, uint16 events) {
 
     return 0;
 }
+
 

@@ -7,12 +7,14 @@
 
 #ifndef _RF_CONFIG_PARAMS_H_
 #define _RF_CONFIG_PARAMS_H_
+
 #include "config.h"
 #include "easyflash.h"
+
 typedef struct  _rf_config_params_struct
 {
-  u8  Channel[3];                              // rf channel(0-39)
-  u8  channelNum;
+    uint8_t  Channel[3];                              // rf channel(0-39)
+    uint8_t  channelNum;
   u32 accessAddress;                        // access address,32bit PHY address
   u32 CRCInit;                              // crc initial value
 }rf_config_params_t;

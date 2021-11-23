@@ -8,7 +8,7 @@
 #ifndef _LWNS_RUC_EXAMPLE_H_
 #define _LWNS_RUC_EXAMPLE_H_
 
-#include "WCH_LWNS_LIB.h"
+#include "lwns_config.h"
 
 
 #define RUC_EXAMPLE_TX_PERIOD_EVT                 1<<(0)

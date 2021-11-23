@@ -474,11 +474,6 @@
               <FilePath>.\Drivers\EasyFlash\ef_env.c</FilePath>
             </File>
             <File>
-              <FileName>ef_log.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Drivers\EasyFlash\ef_log.c</FilePath>
-            </File>
-            <File>
               <FileName>ef_port.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Drivers\EasyFlash\ef_port.c</FilePath>
@@ -639,6 +634,11 @@
               <FilePath>.\Src\APP\peripheral.c</FilePath>
             </File>
             <File>
+              <FileName>lwns_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\APP\include\lwns_config.h</FilePath>
+            </File>
+            <File>
               <FileName>lwns_adapter_blemesh_mac.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Src\APP\lwns_adapter_blemesh_mac.c</FilePath>
@@ -692,6 +692,11 @@
               <FileName>lwns_prov.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Src\APP\lwns_prov.c</FilePath>
+            </File>
+            <File>
+              <FileName>lwns_prov.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Src\APP\include\lwns_prov.h</FilePath>
             </File>
             <File>
               <FileName>lwns_addr_manage.c</FileName>

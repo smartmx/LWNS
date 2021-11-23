@@ -1,24 +1,21 @@
 /*
  *  lwns_adapter_blemesh_mac.c
- *  最新更新和教程文档都在https://gitee.com/jiamai01/lwns/
  *  lwns适配器，适配不同的芯片和库：
-   *    本文件提供了一种模仿ble_mesh发送接收的mac层协议
-   *    存在并发数据发送的场景推荐使用本文件
-   *    用户可以修改头文件中的宏定义来更改参数
-   *    本文件中ble_phy_channelmap为需要发送和接收的通道列表，用户根据自己需求修改为蓝牙通道中的任意三个通道。
- *  Created on: Jul 14, 2021
- *      Author: WCH
- */
-/*
+ *  本文件提供了一种模仿ble_mesh发送接收的mac层协议
+ *  存在并发数据发送的场景推荐使用本文件
+ *  用户可以修改头文件中的宏定义来更改参数
+ *  本文件中ble_phy_channelmap为需要发送和接收的通道列表，用户根据自己需求修改为蓝牙通道中的任意三个通道。
  *  蓝牙mesh是在37、38、39三个广播通道的广播accessaddress:0x8E89BED6进行周期性发送。正确符合相应规则的accessaddress接入地址约有23亿个
  *  本文件采用的发送通道数量和通道号还有accessaddress可以自定，accessaddress切换通道时不变，通道建议3个，不要太多。
+ *  Created on: Jul 14, 2021
+ *  Author: WCH
  */
-
-#include "config.h"
-#include "CH57x_common.h"
 #include "lwns_adapter_blemesh_mac.h"
 #include "lwns_sec.h"
+#include "rf_config_params.h"
+#include "lwns_addr_manage.h"
 
+//每个文件单独debug打印的开关，置0可以禁止本文件内部打印
 #define DEBUG_PRINT_IN_THIS_FILE 1
 #if DEBUG_PRINT_IN_THIS_FILE
 #define PRINTF(...) PRINT(__VA_ARGS__)
@@ -29,45 +26,53 @@
 #if LWNS_USE_BLEMESH_MAC//是否使能模仿blemesh的mac协议，注意只能使能一个mac层协议。
 
 //for lwns_packet_buffer save
-#define QBUF_MANUAL_NUM             4
 __attribute__((aligned(4)))  static lwns_qbuf_list_t qbuf_memp[QBUF_MANUAL_NUM];
 
 //for lwns_route_entry manage
-#define ROUTE_ENTRY_MANUAL_NUM      32
 #if ROUTE_ENTRY_MANUAL_NUM
 __attribute__((aligned(4)))  static lwns_route_entry_data_t route_entry_memp[ROUTE_ENTRY_MANUAL_NUM];
 #endif
 
 //for neighbor manage
-#define NEIGHBOR_MANUAL_NUM         LWNS_NEIGHBOR_MAX_NUM
-__attribute__((aligned(4)))  static lwns_neighbor_list_t neighbor_memp[NEIGHBOR_MANUAL_NUM];
+__attribute__((aligned(4)))  static lwns_neighbor_list_t neighbor_memp[LWNS_NEIGHBOR_MAX_NUM];
 
 static void ble_new_neighbor_callback(lwns_addr_t *n); //发现新邻居回调函数
-static BOOL ble_phy_output(u8 * dataptr, uint8_t len); //发送接口函数
-static void RF_2G4StatusCallBack(uint8 sta, uint8 crc, uint8 *rxBuf);
+static BOOL ble_phy_output(uint8_t * dataptr, uint8_t len); //发送接口函数
+static void RF_2G4StatusCallBack(uint8_t sta, uint8_t crc, uint8_t *rxBuf);
 
-static uint8 lwns_adapter_taskid;
-static uint16 lwns_adapter_ProcessEvent(uint8 task_id, uint16 events);
-static uint8 lwns_phyoutput_taskid;
-static uint16 lwns_phyoutput_ProcessEvent(uint8 task_id, uint16 events);
+static uint8_t lwns_adapter_taskid;
+static uint16_t lwns_adapter_ProcessEvent(uint8_t task_id, uint16_t events);
+static uint8_t lwns_phyoutput_taskid;
+static uint16_t lwns_phyoutput_ProcessEvent(uint8_t task_id, uint16_t events);
 
-//lwns必用的函数接口，将指针传递给lwns库内部使用
+/**
+ * lwns必用的函数接口，将指针传递给lwns库内部使用
+ */
 static lwns_fuc_interface_t ble_lwns_fuc_interface = {
         .lwns_phy_output  = ble_phy_output,
-        .lwns_rand        = tmos_rand,
-        .lwns_memcpy      = tmos_memcpy,
-        .lwns_memcmp      = tmos_memcmp,
-        .lwns_memset      = tmos_memset,
+        .lwns_rand        = (uint32_t (*)(void))tmos_rand,
+        .lwns_memcpy      = (void (*)(void *dst, const void *src, uint32_t len))tmos_memcpy,
+        .lwns_memcmp      = (BOOL (*)(const void *src1, const void *src2, uint32_t len))tmos_memcmp,
+        .lwns_memset      = (void (*)(void * pDst, uint8_t Value, uint32_t len))tmos_memset,
         .new_neighbor_callback  = ble_new_neighbor_callback,
 };
 
-static const u8 ble_phy_channelmap[]={8,18,28};//所需要用到的通道集合，用户自行更换为想要发送的通道集合。
-static u8 ble_phy_channelmap_send_seq = 0, ble_phy_channelmap_receive_seq = 0, ble_phy_send_cnt = 0;//发送接收当前通道序号和发送次数管理
+static uint8_t ble_phy_channelmap_send_seq = 0, ble_phy_channelmap_receive_seq = 0, ble_phy_send_cnt = 0;//发送接收当前通道序号和发送次数管理
 static struct blemesh_mac_phy_manage_struct*    blemesh_phy_manage_list_head = NULL; //mac管理发送LIST列表指针
 static struct blemesh_mac_phy_manage_struct     blemesh_phy_manage_list[LWNS_MAC_SEND_PACKET_MAX_NUM]; //mac管理发送列表管理数组
 
-
-static void RF_2G4StatusCallBack(uint8 sta, uint8 crc, uint8 *rxBuf) {//rxBuf[0]为信号强度，rxBuf[1]为本次收到数据的长度
+/*********************************************************************
+ * @fn      RF_2G4StatusCallBack
+ *
+ * @brief   RF 状态回调，注意：不可在此函数中直接调用RF接收或者发送API，需要使用事件的方式调用
+ *
+ * @param   sta     -   状态类型
+ * @param   crc     -   crc校验结果
+ * @param   rxBuf   -   数据buf指针
+ *
+ * @return  None.
+ */
+static void RF_2G4StatusCallBack(uint8_t sta, uint8_t crc, uint8_t *rxBuf) {//rxBuf[0]为信号强度，rxBuf[1]为本次收到数据的长度
     switch (sta) {
     case RX_MODE_RX_DATA: {
         if (crc == 1) {
@@ -75,7 +80,7 @@ static void RF_2G4StatusCallBack(uint8 sta, uint8 crc, uint8 *rxBuf) {//rxBuf[0]
         } else if (crc == 2) {
             PRINTF("match type error\n");
         } else {
-            u8 *pMsg;
+            uint8_t *pMsg;
 #if LWNS_ENCRYPT_ENABLE//是否启用消息加密，采用aes128，为硬件实现
             if (((rxBuf[1] % 16) == 1) && (rxBuf[1] >= 17) && (rxBuf[1] > rxBuf[2])) {//对齐后数据区最少16个字节，加上真实数据长度一字节
                 //长度校验通过，所以rxBuf[1] - 1必为16的倍数
@@ -112,7 +117,7 @@ static void RF_2G4StatusCallBack(uint8 sta, uint8 crc, uint8 *rxBuf) {//rxBuf[0]
             }
 #endif
         }
-        tmos_set_event(lwns_adapter_taskid, LWNS_PHY_RX_OPEN_EVT);//重新打开接收
+        tmos_set_event(lwns_adapter_taskid, LWNS_PHY_RX_OPEN_EVT);
         break;
     }
     case TX_MODE_TX_FINISH:
@@ -124,67 +129,102 @@ static void RF_2G4StatusCallBack(uint8 sta, uint8 crc, uint8 *rxBuf) {//rxBuf[0]
         break;
     }
 }
+
+/*********************************************************************
+ * @fn      RF_Init
+ *
+ * @brief   RF 初始化.
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 void RF_Init(void) {
-    uint8 state;
+    uint8_t state;
     rfConfig_t rfConfig;
     tmos_memset( &rfConfig, 0, sizeof(rfConfig_t) );
-    rfConfig.TxAccessAddress = 0x17267162; // 禁止使用0x55555555以及0xAAAAAAAA ( 建议不超过24次位反转，且不超过连续的6个0或1 )，正确符合相应规则的accessaddress接入地址约有23亿个
-		rfConfig.RxAccessAddress = 0x17267162;
-    rfConfig.TxCRCInit = 0x555555;
-		rfConfig.RxCRCInit = 0x555555;
+    rf_config_params_init();//读取flash存有的参数
+		rfConfig.TxAccessAddress = lwns_rf_params.accessAddress; // 禁止使用0x55555555以及0xAAAAAAAA ( 建议不超过24次位反转，且不超过连续的6个0或1 )，正确符合相应规则的accessaddress接入地址约有23亿个
+    rfConfig.RxAccessAddress = lwns_rf_params.accessAddress;
+    rfConfig.TxCRCInit = lwns_rf_params.CRCInit;
+    rfConfig.RxCRCInit = lwns_rf_params.CRCInit;
     ble_phy_channelmap_receive_seq = 0;
-    rfConfig.Channel = ble_phy_channelmap[0];
+    rfConfig.Channel = lwns_rf_params.Channel[ble_phy_channelmap_receive_seq];
     rfConfig.LLEMode = LLE_MODE_BASIC; //|LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
     rfConfig.rfStatusCB = RF_2G4StatusCallBack;
     state = RF_Config(&rfConfig);
     PRINTF("rf 2.4g init: %x\n", state);
 }
 
+/*********************************************************************
+ * @fn      lwns_init
+ *
+ * @brief   lwns初始化.
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 void lwns_init(void) {
     uint8_t s;
     lwns_config_t cfg;
     tmos_memset( &cfg, 0, sizeof(lwns_config_t) );
-    cfg.lwns_lib_name = (u8*) VER_LWNS_FILE; //验证函数库名称，防止版本出错
+    cfg.lwns_lib_name = (uint8_t*) VER_LWNS_FILE; //验证函数库名称，防止版本出错
     cfg.qbuf_num = QBUF_MANUAL_NUM; //必须分配，至少1个内存单位，根据你程序中使用的端口数对应模块使用的qbuf单位来定义。
-    cfg.qbuf_ptr = qbuf_memp; //mesh最多使用3个qbuf单位，(uni/multi)netflood最多使用2个，其他模块都使用1个。
+    cfg.qbuf_ptr = qbuf_memp; //mesh最多使用3个qbuf单位，(uni)netflood最多使用2个，其他模块都使用1个。
     cfg.routetable_num = ROUTE_ENTRY_MANUAL_NUM; //如果需要使用mesh，必须分配路由表内存空间。不然mesh初始化不会成功。
 #if ROUTE_ENTRY_MANUAL_NUM
     cfg.routetable_ptr = route_entry_memp;
 #else
     cfg.routetable_ptr = NULL;
 #endif
-    cfg.neighbor_num = NEIGHBOR_MANUAL_NUM; //邻居表数量，必须分配
+    cfg.neighbor_num = LWNS_NEIGHBOR_MAX_NUM; //邻居表数量，必须分配
     cfg.neighbor_list_ptr = neighbor_memp; //邻居表内存空间
     cfg.neighbor_mod = LWNS_NEIGHBOR_AUTO_ADD_STATE_RECALL_ADDALL; //邻居表初始化默认管理模式为接收所有包，添加所有邻居并且过滤重复包的模式
-#if LWNS_ADDR_USE_BLE_MAC
-    GetMACAddress(cfg.addr.u8); //蓝牙硬件的mac地址
-#else
-//自行定义的地址
-            uint8 MacAddr[6] = {0,0,0,0,0,1};
-            tmos_memcpy(cfg.addr.u8, MacAddr, LWNS_ADDR_SIZE);
-#endif
+    lwns_addr_init(&cfg.addr);//地址初始化
     s = lwns_lib_init(&ble_lwns_fuc_interface, &cfg); //lwns库底层初始化
     if (s) {
         PRINTF("%s init err:%d\n", VER_LWNS_FILE, s);
     } else {
         PRINTF("%s init ok\n", VER_LWNS_FILE);
     }
+    lwns_sec_init();//秘钥初始化，从flash中读取
     lwns_adapter_taskid = TMOS_ProcessEventRegister(lwns_adapter_ProcessEvent);
     lwns_phyoutput_taskid = TMOS_ProcessEventRegister(lwns_phyoutput_ProcessEvent);
     tmos_start_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT, MS1_TO_SYSTEM_TIME(LWNS_HTIMER_PERIOD_MS));
-    tmos_memset(blemesh_phy_manage_list, 0, sizeof(blemesh_phy_manage_list));//清除发送管理结构体
+    tmos_memset(blemesh_phy_manage_list, 0, sizeof(blemesh_phy_manage_list));
     ble_phy_send_cnt = 0;//清空发送次数计数
     RF_Shut();
     RF_Rx(NULL, 0, USER_RF_RX_TX_TYPE, USER_RF_RX_TX_TYPE); //打开RF接收，如果需要低功耗管理，在其他地方打开。
     tmos_start_task(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT, MS1_TO_SYSTEM_TIME(LWNS_MAC_PERIOD_MS));
 }
+
+/*********************************************************************
+ * @fn      ble_new_neighbor_callback
+ *
+ * @brief   当发现一个新邻居时的回调函数.
+ *
+ * @param   n  - 新邻居的地址.
+ *
+ * @return  None.
+ */
 static void ble_new_neighbor_callback(lwns_addr_t *n) {
-    PRINTF("new neighbor: %02x %02x %02x %02x %02x %02x\n", n->u8[0], n->u8[1],
-            n->u8[2], n->u8[3], n->u8[4], n->u8[5]);
+    PRINTF("new neighbor: %02x %02x %02x %02x %02x %02x\n", n->v8[0], n->v8[1],
+            n->v8[2], n->v8[3], n->v8[4], n->v8[5]);
 }
-/*---------------------------------------------------------------------------*/
-static BOOL ble_phy_output(u8 * dataptr, uint8_t len) {
-    u8 *pMsg, i;
+
+/*********************************************************************
+ * @fn      ble_phy_output
+ *
+ * @brief   lwns发送函数接口
+ *
+ * @param   dataptr     - 待发送的数据缓冲头指针.
+ * @param   len         - 待发送的数据缓冲长度.
+ *
+ * @return  TRUE if success, FLASE is failed.
+ */
+static BOOL ble_phy_output(uint8_t * dataptr, uint8_t len) {
+    uint8_t *pMsg, i;
     struct blemesh_mac_phy_manage_struct* p;
     for (i = 0; i < LWNS_MAC_SEND_PACKET_MAX_NUM; i++) {
         if (blemesh_phy_manage_list[i].data == NULL) {
@@ -232,15 +272,28 @@ static BOOL ble_phy_output(u8 * dataptr, uint8_t len) {
     return FALSE;
 }
 
-static uint16 lwns_adapter_ProcessEvent(uint8 task_id, uint16 events) {
+/*********************************************************************
+ * @fn      lwns_adapter_ProcessEvent
+ *
+ * @brief   lwns adapter Task event processor.  This function
+ *          is called to process all events for the task.  Events
+ *          include timers, messages and any other user defined events.
+ *
+ * @param   task_id - The TMOS assigned task ID.
+ * @param   events - events to process.  This is a bit map and can
+ *                   contain more than one event.
+ *
+ * @return  events not processed.
+ */
+static uint16_t lwns_adapter_ProcessEvent(uint8_t task_id, uint16_t events) {
     if (events & LWNS_PHY_RX_CHANGE_CHANNEL_EVT)//处理更换接收通道事件
     {
         ble_phy_channelmap_receive_seq++;
-        if(ble_phy_channelmap_receive_seq >= sizeof(ble_phy_channelmap)){
+        if(ble_phy_channelmap_receive_seq >= lwns_rf_params.channelNum){
             ble_phy_channelmap_receive_seq = 0;
         }
         RF_Shut();
-        RF_SetChannel(ble_phy_channelmap[ble_phy_channelmap_receive_seq]);//周期性更改发送通道
+        RF_SetChannel(lwns_rf_params.Channel[ble_phy_channelmap_receive_seq]);//周期性更改发送通道
         RF_Rx(NULL, 0, USER_RF_RX_TX_TYPE, USER_RF_RX_TX_TYPE); //重新打开接收
         tmos_start_task(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT, MS1_TO_SYSTEM_TIME(LWNS_MAC_PERIOD_MS));
         return (events ^ (LWNS_PHY_RX_CHANGE_CHANNEL_EVT | LWNS_PHY_RX_OPEN_EVT));//停止可能已经置位的、可能会打开接收的任务
@@ -251,7 +304,7 @@ static uint16 lwns_adapter_ProcessEvent(uint8 task_id, uint16 events) {
         return (events ^ LWNS_PHY_RX_OPEN_EVT);
     }
     if (events & SYS_EVENT_MSG) {//处理打开接收后，再处理数据
-        uint8 *pMsg;
+        uint8_t *pMsg;
         if ((pMsg = tmos_msg_receive(lwns_adapter_taskid)) != NULL) {
             // Release the TMOS message,tmos_msg_allocate
             lwns_input(pMsg + 1, pMsg[0]); //将数据存入协议栈缓冲区
@@ -265,14 +318,27 @@ static uint16 lwns_adapter_ProcessEvent(uint8 task_id, uint16 events) {
     return 0;
 }
 
-static uint16 lwns_phyoutput_ProcessEvent(uint8 task_id, uint16 events) {
+/*********************************************************************
+ * @fn      lwns_phyoutput_ProcessEvent
+ *
+ * @brief   lwns phyoutput Task event processor.  This function
+ *          is called to process all events for the task.  Events
+ *          include timers, messages and any other user defined events.
+ *
+ * @param   task_id - The TMOS assigned task ID.
+ * @param   events - events to process.  This is a bit map and can
+ *                   contain more than one event.
+ *
+ * @return  events not processed.
+ */
+static uint16_t lwns_phyoutput_ProcessEvent(uint8_t task_id, uint16_t events) {
     if (events & LWNS_HTIMER_PERIOD_EVT) {
         lwns_htimer_update(); //htimer更新。
         tmos_start_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT, MS1_TO_SYSTEM_TIME(LWNS_HTIMER_PERIOD_MS));//周期性更新
         return (events ^ LWNS_HTIMER_PERIOD_EVT);
     }
     if (events & LWNS_PHY_OUTPUT_PREPARE_EVT) {//准备发送工作
-        u8 rand_delay;
+        uint8_t rand_delay;
         rand_delay = tmos_rand() % MS1_TO_SYSTEM_TIME(LWNS_MAC_SEND_DELAY_MAX_MS) + BLE_PHY_ONE_PACKET_MAX_625US;//随机延迟
         ble_phy_channelmap_send_seq = 0;//发送通道序号
         PRINTF("rand send:%d\n", rand_delay);
@@ -280,15 +346,15 @@ static uint16 lwns_phyoutput_ProcessEvent(uint8 task_id, uint16 events) {
         return (events ^ LWNS_PHY_OUTPUT_PREPARE_EVT);
     }
     if (events & LWNS_PHY_OUTPUT_FINISH_EVT) {                    //发送完成任务
-        if(ble_phy_channelmap_send_seq < sizeof(ble_phy_channelmap)){
+        if(ble_phy_channelmap_send_seq < lwns_rf_params.channelNum){
             if(ble_phy_channelmap_send_seq == 0){//只需要在开始发送的时候停任务
                 tmos_stop_task(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT);//发送期间，停止继续切换接收通道
                 tmos_clear_event(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT);//停止可能已经置位的、可能会打开接收的任务
                 tmos_clear_event(lwns_adapter_taskid, LWNS_PHY_RX_OPEN_EVT);//停止可能已经置位的、可能会打开接收的任务
             }
             RF_Shut();
-            RF_SetChannel(ble_phy_channelmap[ble_phy_channelmap_send_seq]);//周期性更改发送通道
-            RF_Tx((u8 *) (blemesh_phy_manage_list_head->data + 1),
+            RF_SetChannel(lwns_rf_params.Channel[ble_phy_channelmap_send_seq]);//周期性更改发送通道
+            RF_Tx((uint8_t *) (blemesh_phy_manage_list_head->data + 1),
                                     blemesh_phy_manage_list_head->data[0], USER_RF_RX_TX_TYPE,
                                     USER_RF_RX_TX_TYPE);
             tmos_start_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_FINISH_EVT, MS1_TO_SYSTEM_TIME(LWNS_PHY_OUTPUT_TIMEOUT_MS));//开始发送超时计数，防止有意外打断发送，导致无法继续发送
@@ -313,7 +379,7 @@ static uint16 lwns_phyoutput_ProcessEvent(uint8 task_id, uint16 events) {
         return (events ^ LWNS_PHY_OUTPUT_FINISH_EVT);
     }
     if (events & SYS_EVENT_MSG) {
-        uint8 *pMsg;
+        uint8_t *pMsg;
         if ((pMsg = tmos_msg_receive(lwns_phyoutput_taskid)) != NULL) {
             // Release the TMOS message,tmos_msg_allocate
             tmos_msg_deallocate(pMsg); //释放内存
@@ -323,5 +389,68 @@ static uint16 lwns_phyoutput_ProcessEvent(uint8 task_id, uint16 events) {
     }
     return 0;
 }
+
+/*********************************************************************
+ * @fn      lwns_shut
+ *
+ * @brief   停止lwns，不可以在这lwns_phyoutput_taskid和lwns_adapter_taskid的processEvent中调用。
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
+void lwns_shut()
+{
+    uint8_t *pMsg;
+    RF_Shut();//关闭RF接收
+    while(blemesh_phy_manage_list_head != NULL){
+        /* 清除所有缓存中待发送的消息 */
+        tmos_msg_deallocate(blemesh_phy_manage_list_head->data);
+        blemesh_phy_manage_list_head->data = NULL;
+        blemesh_phy_manage_list_head = blemesh_phy_manage_list_head->next;
+    }
+    tmos_stop_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);//停止Htimer心跳时钟
+    tmos_clear_event(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);
+    tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_PREPARE_EVT);
+    tmos_clear_event(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_PREPARE_EVT);
+    tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_FINISH_EVT);
+    tmos_clear_event(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_FINISH_EVT);
+    while ((pMsg = tmos_msg_receive(lwns_adapter_taskid)) != NULL) {
+        /* 清除所有缓存的消息 */
+        tmos_msg_deallocate(pMsg);
+    }
+    tmos_stop_task(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT);//停止Htimer心跳时钟
+    tmos_clear_event(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT);
+    tmos_stop_task(lwns_adapter_taskid, LWNS_PHY_RX_OPEN_EVT);
+    tmos_clear_event(lwns_adapter_taskid, LWNS_PHY_RX_OPEN_EVT);
+    tmos_clear_event(lwns_adapter_taskid, SYS_EVENT_MSG);
+
+    /* 清空发送次数计数 */
+    ble_phy_send_cnt = 0;
+    /* 清空发送序号 */
+    ble_phy_channelmap_send_seq = 0;
+    /* 清空接收通道序号 */
+    ble_phy_channelmap_receive_seq = 0;
+}
+
+/*********************************************************************
+ * @fn      lwns_start
+ *
+ * @brief   lwns开始运行，在使用lwns_shut后，重新开始时使用。
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
+void lwns_start()
+{
+    RF_Shut();
+    RF_SetChannel(lwns_rf_params.Channel[ble_phy_channelmap_receive_seq]);//周期性更改发送通道
+    RF_Rx(NULL, 0, USER_RF_RX_TX_TYPE, USER_RF_RX_TX_TYPE); //打开RF接收，如果需要低功耗管理，在其他地方打开。
+    tmos_start_task(lwns_adapter_taskid, LWNS_PHY_RX_CHANGE_CHANNEL_EVT, MS1_TO_SYSTEM_TIME(LWNS_MAC_PERIOD_MS));
+    tmos_start_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT, MS1_TO_SYSTEM_TIME(LWNS_HTIMER_PERIOD_MS));
+}
+
+
 #endif  /* LWNS_USE_BLEMESH_MAC */
 

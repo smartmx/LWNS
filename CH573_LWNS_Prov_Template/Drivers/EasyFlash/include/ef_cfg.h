@@ -41,18 +41,12 @@
  * ENV version number defined by user.
  * Please change it when your firmware add a new ENV to default_env_set.
  */
-#define EF_ENV_VER_NUM           2 /* @note you must define it for a value, such as 0 */
+#define EF_ENV_VER_NUM           0 /* @note you must define it for a value, such as 0 */
 
 /* MCU Endian Configuration, default is Little Endian Order. */
 /* #define EF_BIG_ENDIAN  */         
 
 #endif /* EF_USING_ENV */
-
-/* using IAP function */
-/* #define EF_USING_IAP */
-
-/* using save log function */
-//#define EF_USING_LOG
 
 /* The minimum size of flash erasure. May be a flash sector size. */
 #define EF_ERASE_MIN_SIZE           EEPROM_MIN_ER_SIZE/* @note you must define it for a value */
@@ -87,9 +81,6 @@
 
 /* ENV area size. It's at least one empty sector for GC. So it's definition must more then or equal 2 flash sector size. */
 #define ENV_AREA_SIZE             (EF_ERASE_MIN_SIZE*16)    /* @note you must define it for a value if you used ENV */
-
-/* saved log area size */
-//#define LOG_AREA_SIZE             (EF_ERASE_MIN_SIZE*30)/* @note you must define it for a value if you used log */
 
 /* print debug information of flash */
 #define PRINT_DEBUG

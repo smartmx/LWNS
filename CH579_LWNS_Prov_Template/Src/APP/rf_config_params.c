@@ -16,6 +16,9 @@
 
 //用户在此修改，为默认的rf config参数，第一次运行程序，flash中不会存有此参数，所以默认采用此参数进行rf配置
 //通过配网，用户将新的rf config参数写入flash中，即完成配网操作
+/**
+ * 默认的rf参数信息
+ */
 rf_config_params_t lwns_rf_params = {
         .Channel[0] = 8,
         .Channel[1] = 18,
@@ -27,6 +30,15 @@ rf_config_params_t lwns_rf_params = {
 
 __attribute__((aligned(4)))  const char lwns_rf_params_index[]={"rcfg"};
 
+/*********************************************************************
+ * @fn      rf_config_params_init
+ *
+ * @brief   rf参数初始化，从flash中读取
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 void rf_config_params_init(void){
     size_t  len;
     ef_get_env_blob(lwns_rf_params_index, NULL, 0, &len);
@@ -47,6 +59,15 @@ void rf_config_params_init(void){
     }
 }
 
+/*********************************************************************
+ * @fn      rf_config_params_save_to_flash
+ *
+ * @brief   lwns将rf参数保存到flash
+ *
+ * @param   to     -   密钥将保存到的缓冲区头指针.
+ *
+ * @return  defined in EfErrCode.
+ */
 EfErrCode rf_config_params_save_to_flash(void)
 {
     EfErrCode err;

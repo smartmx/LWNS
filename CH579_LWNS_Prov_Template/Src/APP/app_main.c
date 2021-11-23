@@ -77,8 +77,9 @@ int main( void )
   Peripheral_Init();//初始化蓝牙从机
   HAL_Init(  );
   RF_RoleInit( );
-  easyflash_init();//初始化easyflash，以读取保存的参数
-	//lwns_provisioned_reset();
+	//ef_port_erase(EF_START_ADDR,8*512);while(1);//清除easyflash所用的存储空间，调试中需要复位时取消注释。
+	easyflash_init();//初始化easyflash，以读取保存的参数
+	//lwns_provisioned_reset();while(1);//清除配网信息，调试中需要取消配网状态时，取消注释。
   RF_Init();//初始化rf
   lwns_init();//初始lwns协议栈
   prov_process_init();

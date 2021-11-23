@@ -8,8 +8,7 @@
 #ifndef _LWNS_PROV_H_
 #define _LWNS_PROV_H_
 
-#include "WCH_LWNS_LIB.h"
-#include "CH57x_common.h"
+#include "lwns_config.h"
 #include "rf_config_params.h"
 #include "lwns_sec.h"
 

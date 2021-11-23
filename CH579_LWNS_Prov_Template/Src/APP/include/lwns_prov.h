@@ -8,15 +8,14 @@
 #ifndef _LWNS_PROV_H_
 #define _LWNS_PROV_H_
 
-#include "WCH_LWNS_LIB.h"
-#include "CH57x_common.h"
+#include "lwns_config.h"
 #include "rf_config_params.h"
 #include "lwns_sec.h"
 
 #define PROV_BC_PORT 1  //配网广播通道端口
 #define PROV_UC_PORT 2  //配网单播通道端口
 
-#define PROV_MASTER 1 //是否为主机设备，为0即为从机设备
+#define PROV_MASTER 0 //是否为主机设备，为0即为从机设备
 #define BLE_PROV    1 //是否使能使用蓝牙配网
 
 

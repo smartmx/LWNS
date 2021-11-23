@@ -62,7 +62,7 @@ EfErrCode ef_port_init(ef_env **default_env, size_t *default_env_size) {
 
     *default_env = default_env_set;
     *default_env_size = sizeof(default_env_set) / sizeof(default_env_set[0]);
-
+		ef_print("ef_port_init\n");
     return result;
 }
 
@@ -80,7 +80,6 @@ EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
     EfErrCode read_result = EF_NO_ERR;
     //ef_print("ef_port_read:%04x,%04x,%04x\n",addr,buf,size);
 		tmos_memcpy(buf,(const void *)addr,size);
-    EF_ASSERT(read_result == 0);
     return read_result;
 }
 
@@ -96,22 +95,17 @@ EfErrCode ef_port_read(uint32_t addr, uint32_t *buf, size_t size) {
  */
 EfErrCode ef_port_erase(uint32_t addr, size_t size) {
     EfErrCode ef_port_erase_result = EF_NO_ERR;
-		unsigned char flash_err;
     size_t erase_size = 0;
     /* make sure the start address is a multiple of FLASH_ERASE_MIN_SIZE */
     EF_ASSERT(addr % EF_ERASE_MIN_SIZE == 0);
-    ef_print("ef_port_erase:0x%04x,0x%04x\n", addr, size);
+    //ef_print("ef_port_erase:0x%04x,0x%04x\n", addr, size);
 		while(erase_size < size){
-			flash_err = FlashBlockErase(addr + erase_size);
-			if(flash_err){
+			if(FlashBlockErase(addr + erase_size) != 0){
+				ef_port_erase_result = EF_ERASE_ERR;
 				break;
 			}
 			erase_size += EF_ERASE_MIN_SIZE;
 		}
-    EF_ASSERT(flash_err == 0);
-    if (flash_err != 0) {
-        ef_port_erase_result = EF_ERASE_ERR;
-    }
     return ef_port_erase_result;
 }
 /**
@@ -127,16 +121,23 @@ EfErrCode ef_port_erase(uint32_t addr, size_t size) {
  */
 EfErrCode ef_port_write(uint32_t addr, const uint32_t *buf, size_t size) {
     EfErrCode result = EF_NO_ERR;
-    unsigned char flash_err, ver_err;
-		ef_print("ef_port_write:0x%04x,0x%04x,0x%04x\n", addr, buf, size);
-		if(size > 0){
-			flash_err = FlashWriteBuf(addr, (PUINT32)buf, size);
-			ef_print("wend:%d\n",flash_err);
-			EF_ASSERT(flash_err == 0);
-			ver_err = tmos_memcmp((const void*)addr, buf, size);
-			EF_ASSERT(ver_err == TRUE);
-			if (ver_err != TRUE || flash_err != 0) {
+		//ef_print("ef_port_write:0x%04x,0x%04x,0x%04x\n", addr, buf, size);
+		if((uint32_t)buf % 4 == 0){
+			//buf四字节对齐
+			if (FlashWriteBuf(addr, (PUINT32)buf, size) != 0) {
 					result = EF_WRITE_ERR;
+			}
+		}else{
+			//buf非四字节对齐
+			size_t  w_size = 0;
+			uint32_t write_data[1];
+			while(w_size < size){
+				tmos_memcpy(write_data, (const void *)((uint32_t)buf + w_size), 4);
+				if(FlashWriteDW(addr + w_size, write_data[0]) != 0){
+						result = EF_WRITE_ERR;
+						break;
+				}
+				w_size = w_size + 4;
 			}
 		}
     return result;
@@ -171,7 +172,7 @@ void ef_log_debug(const char *file, const long line, const char *format, ...) {
     va_list args;
     /* args point to the first variable parameter */
     va_start(args, format);
-    PRINTF("[LOG](%s:%ld) ", file, line);
+    PRINTF("[DBG](%s:%ld) ", file, line);
     VPRINTF(format, args);
     PRINTF("\n");
     va_end(args);

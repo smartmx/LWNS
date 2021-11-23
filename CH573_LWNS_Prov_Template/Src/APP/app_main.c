@@ -38,13 +38,15 @@ __attribute__((aligned(4))) u32 MEM_BUF[BLE_MEMHEAP_SIZE/4];
 u8C MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
 #endif
 
-/*******************************************************************************
-* Function Name  : Main_Circulation
-* Description    : 主循环
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      Main_Circulation
+ *
+ * @brief   tmos主循环.
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 __attribute__((section(".highcode")))
 void Main_Circulation()
 {
@@ -53,13 +55,15 @@ void Main_Circulation()
   }
 }
 
-/*******************************************************************************
-* Function Name  : main
-* Description    : 主函数
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
+/*********************************************************************
+ * @fn      main
+ *
+ * @brief   主函数.
+ *
+ * @param   None.
+ *
+ * @return  None.
+ */
 int main( void )
 {
 #if (defined (DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
@@ -79,12 +83,12 @@ int main( void )
   {
     PRINTF("%s\n",VER_LIB);
   }
+  easyflash_init();//初始化easyflash，以读取保存的参数
   CH57X_BLEInit( );
   GAPRole_PeripheralInit();
   Peripheral_Init();//初始化蓝牙从机
   HAL_Init(  );
   RF_RoleInit( );
-  easyflash_init();//初始化easyflash，以读取保存的参数
   RF_Init();//初始化rf
   lwns_init();//初始lwns协议栈
   prov_process_init();
