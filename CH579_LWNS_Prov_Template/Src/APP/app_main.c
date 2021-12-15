@@ -39,21 +39,6 @@ u8C MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
 #endif
 
 /*******************************************************************************
-* Function Name  : Main_Circulation
-* Description    : 主循环
-* Input          : None
-* Output         : None
-* Return         : None
-*******************************************************************************/
-__attribute__((section(".highcode")))
-void Main_Circulation()
-{
-  while(1){
-    TMOS_SystemProcess( );
-  }
-}
-
-/*******************************************************************************
 * Function Name  : main
 * Description    : 主函数
 * Input          : None
@@ -83,6 +68,8 @@ int main( void )
   RF_Init();//初始化rf
   lwns_init();//初始lwns协议栈
   prov_process_init();
-  Main_Circulation();
+  while(1){
+    TMOS_SystemProcess( );
+  }
 }
 /******************************** endfile @ main ******************************/

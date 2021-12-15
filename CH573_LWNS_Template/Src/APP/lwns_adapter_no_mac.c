@@ -329,6 +329,8 @@ void lwns_shut()
 {
     uint8_t *pMsg;
     RF_Shut();//关闭RF接收
+    /* 超时重发全部清除 */
+    lwns_htimer_flush_all();
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);
 

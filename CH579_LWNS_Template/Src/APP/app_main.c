@@ -43,23 +43,6 @@ u8C MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
 #endif
 
 /*********************************************************************
- * @fn      Main_Circulation
- *
- * @brief   tmos主循环.
- *
- * @param   None.
- *
- * @return  None.
- */
-__attribute__((section(".highcode")))
-void Main_Circulation()
-{
-  while(1){
-    TMOS_SystemProcess( );
-  }
-}
-
-/*********************************************************************
  * @fn      main
  *
  * @brief   主函数.
@@ -91,10 +74,12 @@ int main( void )
   //lwns_unicast_process_init();//单播例子初始化
   //lwns_ruc_process_init();//可靠单播例子初始化
   //lwns_rucft_process_init();//可靠单播文件传输例子初始化
-  lwns_netflood_process_init();//网络泛洪例子初始化
+  //lwns_netflood_process_init();//网络泛洪例子初始化
   //lwns_uninetflood_process_init();//单播网络泛洪例子初始化
   //lwns_multinetflood_process_init();//组播网络泛洪例子初始化
-  //lwns_mesh_process_init();//mesh组网例子初始化
-  Main_Circulation();
+  lwns_mesh_process_init();//mesh组网例子初始化
+  while(1){
+    TMOS_SystemProcess( );
+  }
 }
 /******************************** endfile @ main ******************************/

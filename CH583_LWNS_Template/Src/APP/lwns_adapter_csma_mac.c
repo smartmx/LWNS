@@ -146,7 +146,7 @@ void RF_Init(void) {
     rfConfig.accessAddress = 0x17267162; // 禁止使用0x55555555以及0xAAAAAAAA ( 建议不超过24次位反转，且不超过连续的6个0或1 )，正确符合相应规则的accessaddress接入地址约有23亿个
     rfConfig.CRCInit = 0x555555;
     rfConfig.Channel = 8;
-    rfConfig.LLEMode = LLE_MODE_BASIC; //|LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
+    rfConfig.LLEMode = LLE_MODE_BASIC | LLE_MODE_PHY_1M; //|LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
     rfConfig.rfStatusCB = RF_2G4StatusCallBack;
     state = RF_Config(&rfConfig);
     PRINTF("rf 2.4g init: %x\n", state);
@@ -404,6 +404,8 @@ void lwns_shut()
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_EVT);
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_EVT);
 
+    /* 超时重发全部清除 */
+    lwns_htimer_flush_all();
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_PERIOD_EVT);//停止Htimer心跳时钟和发送列表检测
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_PHY_PERIOD_EVT);
 

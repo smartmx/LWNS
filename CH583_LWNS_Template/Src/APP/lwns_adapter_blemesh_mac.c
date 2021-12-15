@@ -148,7 +148,7 @@ void RF_Init(void) {
     rfConfig.CRCInit = 0x555555;
     ble_phy_channelmap_receive_seq = 0;
     rfConfig.Channel = ble_phy_channelmap[0];
-    rfConfig.LLEMode = LLE_MODE_BASIC; //|LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
+    rfConfig.LLEMode = LLE_MODE_BASIC | LLE_MODE_PHY_1M; //|LLE_MODE_EX_CHANNEL; // 使能 LLE_MODE_EX_CHANNEL 表示 选择 rfConfig.Frequency 作为通信频点
     rfConfig.rfStatusCB = RF_2G4StatusCallBack;
     state = RF_Config(&rfConfig);
     PRINTF("rf 2.4g init: %x\n", state);
@@ -412,6 +412,8 @@ void lwns_shut()
         blemesh_phy_manage_list_head->data = NULL;
         blemesh_phy_manage_list_head = blemesh_phy_manage_list_head->next;
     }
+    /* 超时重发全部清除 */
+    lwns_htimer_flush_all();
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);//停止Htimer心跳时钟
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_PREPARE_EVT);

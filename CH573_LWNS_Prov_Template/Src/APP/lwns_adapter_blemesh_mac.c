@@ -407,6 +407,8 @@ void lwns_shut()
         blemesh_phy_manage_list_head->data = NULL;
         blemesh_phy_manage_list_head = blemesh_phy_manage_list_head->next;
     }
+    /* 超时重发全部清除 */
+    lwns_htimer_flush_all();
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);//停止Htimer心跳时钟
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_PREPARE_EVT);

@@ -414,6 +414,8 @@ void lwns_shut()
     }
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);//停止Htimer心跳时钟
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_HTIMER_PERIOD_EVT);
+    /* 超时重发全部清除 */
+    lwns_htimer_flush_all();
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_PREPARE_EVT);
     tmos_clear_event(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_PREPARE_EVT);
     tmos_stop_task(lwns_phyoutput_taskid, LWNS_PHY_OUTPUT_FINISH_EVT);
@@ -434,6 +436,7 @@ void lwns_shut()
     ble_phy_channelmap_send_seq = 0;
     /* 清空接收通道序号 */
     ble_phy_channelmap_receive_seq = 0;
+
 }
 
 /*********************************************************************

@@ -1,9 +1,9 @@
 /********************************** (C) COPYRIGHT ********************************************
  * File Name         : WCH_LWNS_LIB.h
  * Author            : WCH
- * Version           : V1.60
- * Date              : 2021/11/22
- * Description       : this file is a head file for WCH Lightweight Wireless Networking Stack.
+ * Version           : V1.61
+ * Date              : 2021/12/15
+ * Description       : this file is a head file for WCH LightWeight Networking Stack.
  *********************************************************************************************/
 #ifndef _WCH_LWNS_LIB_H_
 #define _WCH_LWNS_LIB_H_
@@ -18,7 +18,7 @@ extern "C"
 
 //@@***********************************************************************general definitions begin
 
-#define  VER_LWNS_FILE                  "WCH_LWNS_LIB_V1.60"
+#define  VER_LWNS_FILE                  "WCH_LWNS_LIB_V1.61"
 
 #ifndef BOOL
 typedef unsigned char                   BOOL;
@@ -109,8 +109,39 @@ extern void get_lwns_addr(lwns_addr_t *t);
 
 typedef unsigned long lwns_clock_time_t;
 
-//put lwns_htimer_update in the soft timer handler function by yourself.
+/*******************************************************************************
+ * @fn          lwns_htimer_update
+ *
+ * @brief       put lwns_htimer_update in the soft timer handler function by yourself.
+ *
+ * input parameters
+ *
+ * @param       None.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
 extern void lwns_htimer_update(void);
+
+/*******************************************************************************
+ * @fn          lwns_htimer_flush_all
+ *
+ * @brief       remove all htimers in htimer list.
+ *
+ * input parameters
+ *
+ * @param       None.
+ *
+ * output parameters
+ *
+ * @param       None.
+ *
+ * @return      None.
+ */
+extern void lwns_htimer_flush_all(void);
 
 //@@***********************************************************************lwns_HTIMER definitions end
 
@@ -423,6 +454,7 @@ typedef enum {
     LWNS_LIB_INIT_ERR_ADDR_NULL,
     LWNS_LIB_INIT_ERR_QBUF,
     LWNS_LIB_INIT_ERR_NEIGHBOR,
+    LWNS_LIB_INIT_ERR_ROUTETABLE,
     LWNS_LIB_INIT_ERR_MAX,
 } ERR_LWNS_LIB_INIT;
 
@@ -1312,8 +1344,6 @@ struct lwns_route_entry {
     lwns_addr_t nexthop;
     uint8_t cost;
     uint8_t time;
-    uint8_t disabled;
-    uint8_t lost;
 };
 
 #define LWNS_ROUTE_ENTRY_LIST_U8_SIZE    21
@@ -1543,4 +1573,4 @@ extern int lwns_mesh_send(lwns_controller_ptr h,
 }
 #endif
 
-#endif /* __LWNS_LIB_H_ */
+#endif /* _WCH_LWNS_LIB_H_ */
