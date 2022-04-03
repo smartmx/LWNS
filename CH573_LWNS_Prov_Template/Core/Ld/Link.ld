@@ -2,8 +2,8 @@ ENTRY( _start )
 
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000 , LENGTH = 0x70000
-  RAM (xrw) : ORIGIN = 0x20003800 , LENGTH = 0x4800
+	FLASH (rx) : ORIGIN = 0x00000000, LENGTH = 448K
+	RAM (xrw) : ORIGIN = 0x20003800, LENGTH = 18K
 }
 
 
@@ -163,6 +163,7 @@ SECTIONS
 		. = ALIGN(4);
 		PROVIDE( _ebss = .);
 	} >RAM AT>FLASH
+
 	PROVIDE( _end = _ebss);
 	PROVIDE( end = . );
 	

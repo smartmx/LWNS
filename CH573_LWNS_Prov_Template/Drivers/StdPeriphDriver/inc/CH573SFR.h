@@ -126,7 +126,7 @@ typedef volatile unsigned long long  *PUINT64V;
 #ifdef  DEBUG
 #define PRINT(X...) printf(X)
 #else
-#define PRINT(X...) do {} while (0)
+#define PRINT(X...)
 #endif
 
 /* Calculate the byte offset of a field in a structure of type */
@@ -328,7 +328,7 @@ extern "C" {
 #define  RB_PWR_DCDC_PRE    0x0400                    // RWA, DC/DC converter pre-enable
 #define  RB_PWR_PLAN_EN     0x8000                    // RWA/WZ, power plan enable, auto clear after sleep executed
 #define  RB_PWR_MUST_0010   0x1000                    // RWA, must write 0010
-#define R16_AUX_POWER_ADJ   (*((PUINT16V)0x40001022))  // RWA, aux power adjust control, SAM
+#define R16_AUX_POWER_ADJ   (*((PUINT8V)0x40001022))  // RWA, aux power adjust control, SAM
 #define  RB_ULPLDO_ADJ      0x0007                    // RWA, Ultra-Low-Power LDO voltage adjust
 
 /* System: battery detector register */

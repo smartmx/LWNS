@@ -4212,8 +4212,6 @@ extern bStatus_t LL_TestEnd( u8 *pPktNum );
 /*
  * END @ Profile API
  */
-extern void *tmos_memory_allocate(u16 size, u16 flag);
-extern void tmos_memory_free(void *ptr);
 /***************************************************************************************************/
 #ifdef __cplusplus
 }

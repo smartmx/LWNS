@@ -2,7 +2,7 @@
 * File Name         : CH57xBLE_LIB.H
 * Author            : WCH
 * Version           : V1.60
-* Date              : 2021/10/27
+* Date              : 2021/11/23
 * Description       : head file
 *******************************************************************************/
 
@@ -2231,18 +2231,12 @@ extern uint32_t TMOS_GetSystemClock( void );
 extern tmosTaskID TMOS_ProcessEventRegister( pTaskEventHandlerFn eventCb );
 
 /**
- * @brief
+ * @brief   set LSE calibration value
  *
- * input parameters
+ * @param   flash_val - the value of flash
+ * @param   ram_val - the value of ram
  *
- * @param       flash_val
- * @param       ram_val
- *
- * output parameters
- *
- * @param       None.
- *
- * @return      None.
+ * @return  None.
  */
 extern void TMOS_Set32KTuneValue( uint16_t flash_val, uint16_t ram_val );
 
@@ -2341,7 +2335,7 @@ extern int8_t BLE_ReadRssi( void );
  *
  * @return  the value of cfo.
  */
-extern s16 BLE_ReadCfo( void );
+extern int16_t BLE_ReadCfo( void );
 
 /**
  * @brief   pa control init

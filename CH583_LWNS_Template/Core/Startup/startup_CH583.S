@@ -1,10 +1,12 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : startup_ch57x.s
-* Author             : WCH
-* Version            : V1.0.0
-* Date               : 2021/02/25
-* Description        : 
-*******************************************************************************/
+ * File Name          : startup_ch58x.s
+ * Author             : WCH
+ * Version            : V1.0.0
+ * Date               : 2021/02/25
+ * Description        :
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
 
 	.section	.init,"ax",@progbits
 	.global	_start
@@ -161,7 +163,7 @@ handle_reset:
 	bltu a0, a1, 1b
 2:
 	/* 流水线控制位 & 动态预测控制位 */
-	li t0, 0x1f	/*原0x3f-为了屏蔽中断*/
+	li t0, 0x1f
 	csrw 0xbc0, t0
 	/* 打开嵌套中断、硬件压栈功能 */
 	li t0, 0x3

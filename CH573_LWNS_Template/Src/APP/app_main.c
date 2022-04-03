@@ -1,10 +1,12 @@
 /********************************** (C) COPYRIGHT *******************************
-* File Name          : main.c
-* Author             : WCH
-* Version            : V1.0
-* Date               : 2020/08/06
-* Description        :
-*******************************************************************************/
+ * File Name          : main.c
+ * Author             : WCH
+ * Version            : V1.0
+ * Date               : 2021/11/17
+ * Description        :
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
 
 /******************************************************************************/
 /* 头文件包含 */
@@ -26,20 +28,23 @@
 #include "lwns_mesh_example.h"
 
 //每个文件单独debug打印的开关，置0可以禁止本文件内部打印
-#define DEBUG_PRINT_IN_THIS_FILE 1
+#define DEBUG_PRINT_IN_THIS_FILE    1
 #if DEBUG_PRINT_IN_THIS_FILE
-#define PRINTF(...) PRINT(__VA_ARGS__)
+  #define PRINTF(...)    PRINT(__VA_ARGS__)
 #else
-#define PRINTF(...) do {} while (0)
+  #define PRINTF(...) \
+    do                \
+    {                 \
+    } while(0)
 #endif
 
 /*********************************************************************
  * GLOBAL TYPEDEFS
  */
-__attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE/4];
+__attribute__((aligned(4))) uint32_t MEM_BUF[BLE_MEMHEAP_SIZE / 4];
 
-#if (defined (BLE_MAC)) && (BLE_MAC == TRUE)
-u8C MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
+#if(defined(BLE_MAC)) && (BLE_MAC == TRUE)
+u8C MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 #endif
 
 /*********************************************************************
@@ -54,9 +59,10 @@ u8C MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
 __attribute__((section(".highcode")))
 void Main_Circulation()
 {
-  while(1){
-    TMOS_SystemProcess( );
-  }
+    while(1)
+    {
+        TMOS_SystemProcess();
+    }
 }
 
 /*********************************************************************
@@ -68,39 +74,39 @@ void Main_Circulation()
  *
  * @return  None.
  */
-int main( void )
+int main(void)
 {
-#if (defined (DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
-  PWR_DCDCCfg( ENABLE );
+#if(defined(DCDC_ENABLE)) && (DCDC_ENABLE == TRUE)
+    PWR_DCDCCfg(ENABLE);
 #endif
-  SetSysClock( CLK_SOURCE_PLL_60MHz );
-#if (defined (HAL_SLEEP)) && (HAL_SLEEP == TRUE)
-  GPIOA_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );
-  GPIOB_ModeCfg( GPIO_Pin_All, GPIO_ModeIN_PU );
+    SetSysClock(CLK_SOURCE_PLL_60MHz);
+#if(defined(HAL_SLEEP)) && (HAL_SLEEP == TRUE)
+    GPIOA_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PU);
+    GPIOB_ModeCfg(GPIO_Pin_All, GPIO_ModeIN_PU);
 #endif
 #ifdef DEBUG
-  GPIOA_SetBits( bTXD1 );
-  GPIOA_ModeCfg( bTXD1, GPIO_ModeOut_PP_5mA );
-  UART1_DefInit( );
-#endif  
-  PRINTF("start.\n");
-  {
-    PRINTF("%s\n",VER_LIB);
-  }
-  CH57X_BLEInit( );
-  HAL_Init(  );
-  RF_RoleInit( );
-  RF_Init( );
-  lwns_init();//初始lwns协议栈
-  //lwns_broadcast_process_init();//广播例子初始化
-  //lwns_multicast_process_init();//组播例子初始化
-  //lwns_unicast_process_init();//单播例子初始化
-  //lwns_ruc_process_init();//可靠单播例子初始化
-  //lwns_rucft_process_init();//可靠单播文件传输例子初始化
-  lwns_netflood_process_init();//网络泛洪例子初始化
-  //lwns_uninetflood_process_init();//单播网络泛洪例子初始化
-  //lwns_multinetflood_process_init();//组播网络泛洪例子初始化
-  //lwns_mesh_process_init();//mesh组网例子初始化
-  Main_Circulation();
+    GPIOA_SetBits(bTXD1);
+    GPIOA_ModeCfg(bTXD1, GPIO_ModeOut_PP_5mA);
+    UART1_DefInit();
+#endif
+    PRINTF("start.\n");
+    {
+        PRINTF("%s\n", VER_LIB);
+    }
+    CH57X_BLEInit();
+    HAL_Init();
+    RF_RoleInit();
+    RF_Init();
+    lwns_init(); //初始lwns协议栈
+    //lwns_broadcast_process_init();//广播例子初始化
+    //lwns_multicast_process_init();//组播例子初始化
+    //lwns_unicast_process_init();//单播例子初始化
+    //lwns_ruc_process_init();//可靠单播例子初始化
+    //lwns_rucft_process_init();//可靠单播文件传输例子初始化
+    lwns_netflood_process_init(); //网络泛洪例子初始化
+    //lwns_uninetflood_process_init();//单播网络泛洪例子初始化
+    //lwns_multinetflood_process_init();//组播网络泛洪例子初始化
+    //lwns_mesh_process_init();//mesh组网例子初始化
+    Main_Circulation();
 }
 /******************************** endfile @ main ******************************/

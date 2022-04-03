@@ -1,14 +1,15 @@
-/*
- * lwns_sec.c
- * lwnsÏûÏ¢¼ÓÃÜ
- * Created on: Sep 17, 2021
- * Author: WCH
- */
-
+/********************************** (C) COPYRIGHT *******************************
+ * File Name          : lwns_sec.c
+ * Author             : WCH
+ * Version            : V1.0
+ * Date               : 2021/09/17
+ * Description        : lwnsÏûÏ¢¼ÓÃÜ
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
 #include "lwns_sec.h"
 
-static uint8_t lwns_sec_key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};//ÓÃ»§×ÔĞĞ¸ü¸ÄÎª×Ô¼ºµÄÃØÔ¿£¬»òÕß¸ÄÎª¿ÉÒÔ´ÓÖ÷»ú»ñÈ¡£¬²¢´æ´¢ÔÚeepromÖĞ
-
+static uint8_t lwns_sec_key[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}; //ÓÃ»§×ÔĞĞ¸ü¸ÄÎª×Ô¼ºµÄÃØÔ¿£¬»òÕß¸ÄÎª¿ÉÒÔ´ÓÖ÷»ú»ñÈ¡£¬²¢´æ´¢ÔÚeepromÖĞ
 
 /*********************************************************************
  * @fn      lwns_msg_encrypt
@@ -21,22 +22,28 @@ static uint8_t lwns_sec_key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};//ÓÃ»§×
  *
  * @return  ¼ÓÃÜºóµÄÊı¾İ³¤¶È.
  */
-int lwns_msg_encrypt(uint8_t *src,uint8_t *to,uint8_t mlen){
+int lwns_msg_encrypt(uint8_t *src, uint8_t *to, uint8_t mlen)
+{
     uint16_t i = 0;
-    uint8_t esrc[16];
-    while(1){
-        if((mlen - i) < 16){
-            tmos_memcpy(esrc, src + i, (mlen - i));//À©³äµ½16×Ö½Ú£¬ÆäËûÎª0
-            LL_Encrypt(lwns_sec_key, esrc , to + i);
-        } else {
-            LL_Encrypt(lwns_sec_key, src + i , to + i);
+    uint8_t  esrc[16];
+    while(1)
+    {
+        if((mlen - i) < 16)
+        {
+            tmos_memcpy(esrc, src + i, (mlen - i)); //À©³äµ½16×Ö½Ú£¬ÆäËûÎª0
+            LL_Encrypt(lwns_sec_key, esrc, to + i);
         }
-        i+=16;
-        if(i >= mlen){
+        else
+        {
+            LL_Encrypt(lwns_sec_key, src + i, to + i);
+        }
+        i += 16;
+        if(i >= mlen)
+        {
             break;
         }
     }
-    return i;//·µ»Ø¼ÓÃÜºóÊı¾İ³¤¶È
+    return i; //·µ»Ø¼ÓÃÜºóÊı¾İ³¤¶È
 }
 
 /*********************************************************************
@@ -50,12 +57,15 @@ int lwns_msg_encrypt(uint8_t *src,uint8_t *to,uint8_t mlen){
  *
  * @return  ½âÃÜºóµÄÊı¾İ³¤¶È.
  */
-int lwns_msg_decrypt(uint8_t *src,uint8_t *to,uint8_t mlen){
+int lwns_msg_decrypt(uint8_t *src, uint8_t *to, uint8_t mlen)
+{
     unsigned short i = 0;
-    while(1){
+    while(1)
+    {
         LL_Decrypt(lwns_sec_key, src + i, to + i);
-        i+=16;
-        if(i >= mlen){
+        i += 16;
+        if(i >= mlen)
+        {
             break;
         }
     }

@@ -2,7 +2,7 @@
 * File Name         : CH57xBLE_ROM.H
 * Author            : WCH
 * Version           : V1.60
-* Date              : 2021/10/27
+* Date              : 2021/11/23
 * Description       : head file
 *                    Address Space
 *                       CODE:   00010000H - 0002FFFFH   128K
@@ -2347,7 +2347,7 @@ typedef struct tag_rf_config
  *
  * @return  the value of rssi.
  */
-#define    BLE_ReadRssi  ((  s8  (*)  ( void ))  BLE_LIB_JT(108) )
+#define    BLE_ReadRssi  ((  int8_t  (*)  ( void ))  BLE_LIB_JT(108) )
 
 /**
  * @brief   read cfo
@@ -2356,7 +2356,7 @@ typedef struct tag_rf_config
  *
  * @return  the value of cfo.
  */
-#define    BLE_ReadCfo ((  s16 (*) ( void )) BLE_LIB_JT(121) )
+#define    BLE_ReadCfo ((  int16_t (*) ( void )) BLE_LIB_JT(121) )
 
 /**
  * @brief   pa control init

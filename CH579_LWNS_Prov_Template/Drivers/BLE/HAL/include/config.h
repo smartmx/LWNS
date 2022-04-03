@@ -99,7 +99,7 @@
 #define BLE_MEMHEAP_SIZE						(1024*8)
 #endif
 #ifndef BLE_BUFF_MAX_LEN
-#define BLE_BUFF_MAX_LEN						251
+#define BLE_BUFF_MAX_LEN						27
 #endif
 #ifndef BLE_BUFF_NUM
 #define BLE_BUFF_NUM								5
