@@ -4,7 +4,7 @@
 
 注意根据不同的功能进行修改宏定义。
 
-## ch5xx_LWNS_Template为LWNS无配网功能例程
+## ch5xx_LWNS_Template为LWNS例程
 
 只要在RF_Init函数中将rf配置为相同参数，
 
@@ -12,19 +12,14 @@
 
 即为同一组设备，适合用来学习使用，也可以直接用于开发。
 
-## ch5xx_LWNS_Prov_Template为LWNS具有配网功能例程
+## 配网
 
-1.支持未配网设备通过配网设备进行配网，
+LWNS只要RF参数一致即在同一个网络中，无需其他配网操作。
+可以自行添加配网流程，例如：
 
-2.支持手机蓝牙对设备进行配网，通过rwprofile进行参数设定，命令见程序细节。
-
-初次启动默认RF_Init配置为rf_config_params.c中的lwns_rf_params全局变量，
-
-秘钥为lwns_sec.c中的秘钥lwns_sec_key。
-
-通过配网可以修改rf参数和秘钥，保存到flash中。
-
-同时具有蓝牙连接功能，可用于开发参考。
+1. 蓝牙配网
+2. USB/UART配网
+3. 未配网设备广播，网关扫描后配网
 
 基于LWNS编写的应用层程序是通用的，不同芯片只需移植好LWNS即可使用相同的LWNS应用层程序。
 
