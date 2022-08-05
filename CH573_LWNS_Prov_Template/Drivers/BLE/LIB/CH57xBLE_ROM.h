@@ -1,14 +1,19 @@
 /********************************** (C) COPYRIGHT ******************************
-* File Name         : CH57xBLE_ROM.H
-* Author            : WCH
-* Version           : V1.60
-* Date              : 2021/11/23
-* Description       : head file
-*                    Address Space
-*                       CODE:   00010000H - 0002FFFFH   128K
-*                       DATA:   20003800H - 200047FFH     4K           
-*******************************************************************************/
-
+ * File Name         : CH57xBLE_ROM.H
+ * Author            : WCH
+ * Version           : V1.80
+ * Date              : 2022/06/28
+ * Description       : head file
+ *                    Address Space
+ *                       CODE:   00010000H - 0002FFFFH   128K
+ *                           :   00050000H - 0006FFFFH   128K
+ *                       DATA:   20003800H - 200047FFH     4K
+ *
+ * note:
+ *  CH57xBLE_ROM.hex   #define LIB_FLASH_BASE_ADDRESSS   0x00010000(default)
+ *  CH57xBLE_ROMx.hex  #define LIB_FLASH_BASE_ADDRESSS   0x00050000
+ * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+ *******************************************************************************/
 
 
 /******************************************************************************/
@@ -19,111 +24,100 @@
 extern "C"
 {
 #endif
+#include  "stdint.h"
 
-#ifndef BOOL
-typedef unsigned char                   BOOL;
-#endif
-#ifndef s8
-typedef signed char                     s8;
-#endif
-#ifndef s16
-typedef signed short                    s16;
-#endif
-#ifndef s32
-typedef signed long                     s32;
-#endif
-#ifndef u8
-typedef unsigned char                   u8;
-#endif
-#ifndef u16
-typedef unsigned short                  u16;
-#endif
-#ifndef u32
-typedef unsigned long                   u32;
-#endif
-#ifndef u64
-typedef unsigned long long              u64;
-#endif
-#ifndef u8C
-typedef const unsigned char             u8C;
-#endif
-#ifndef u32V
-typedef unsigned long volatile          u32V;
-#endif
 #ifndef int8
-typedef signed char                     int8;
+typedef int8_t                  int8;
 #endif
 #ifndef int16
-typedef short                           int16;
+typedef int16_t                 int16;
 #endif
-#ifndef int32
-typedef signed long                     int32;
+#ifndef BOOL
+typedef uint8_t                 BOOL;
 #endif
+#ifndef s8
+typedef int8_t                  s8;
+#endif
+#ifndef s16
+typedef int16_t                 s16;
+#endif
+#ifndef s32
+typedef int32_t                 s32;
+#endif
+#ifndef u8
+typedef uint8_t                 u8;
+#endif
+#ifndef u16
+typedef uint16_t                u16;
+#endif
+#ifndef u32
+typedef uint32_t                u32;
+#endif
+#ifndef u64
+typedef uint64_t                u64;
+#endif
+#ifndef u8C
+typedef const uint8_t           u8C;
+#endif
+
+#ifndef u8V
+typedef uint8_t volatile        u8V;
+#endif
+#ifndef u32V
+typedef uint32_t volatile       u32V;
+#endif
+
 #ifndef uint8
-typedef unsigned char                   uint8;
+typedef uint8_t                 uint8;
 #endif
 #ifndef uint16
-typedef unsigned short                  uint16;
+typedef uint16_t                uint16;
 #endif
 #ifndef uint32
-typedef unsigned long                   uint32;
-#endif
-#ifndef int8_t
-typedef signed char                     int8_t;
-#endif
-#ifndef int16_t
-typedef short                           int16_t;
-#endif
-#ifndef int32_t
-typedef signed long                     int32_t;
-#endif
-#ifndef uint8_t
-typedef unsigned char                   uint8_t;
-#endif
-#ifndef uint16_t
-typedef unsigned short                  uint16_t;
-#endif
-#ifndef uint32_t
-typedef unsigned long                   uint32_t;
+typedef uint32_t                uint32;
 #endif
 
 #ifndef TRUE
-  #define TRUE                          1
+  #define TRUE                  1
 #endif
 #ifndef FALSE
-  #define FALSE                         0
+  #define FALSE                 0
 #endif
 #ifndef NULL
-  #define NULL                          0
+  #define NULL                  0
 #endif
-#ifndef VOID
-  #define VOID                          void
-#endif
-#ifndef  CONST
-  #define CONST                         const
+#ifndef SUCCESS
+#define  SUCCESS                0x00
 #endif
 #ifndef  bStatus_t
-typedef unsigned char                   bStatus_t;
+typedef uint8_t                 bStatus_t;
 #endif
 #ifndef  tmosTaskID
-typedef unsigned char                   tmosTaskID;
+typedef uint8_t                 tmosTaskID;
 #endif
 #ifndef  tmosEvents
-typedef unsigned short                  tmosEvents;
+typedef uint16_t                tmosEvents;
 #endif
 #ifndef  tmosTimer
-typedef unsigned long                   tmosTimer;
+typedef uint32_t                tmosTimer;
 #endif
+#ifndef  tmosSnvId_t
+typedef uint8_t                 tmosSnvId_t;
+#endif
+#ifndef  tmosSnvLen_t
+typedef uint8_t                 tmosSnvLen_t;
+#endif
+
 // Define function type that generate a random seed callback
 typedef uint32_t (*pfnSrandCB)( void );
 // Define function type that switch to idle mode callback
-typedef uint32_t (*pfnSleepCB)( uint32_t );
-// Define function type that run RC 32K clock calibration callback
-typedef void (*pfnLSECalibrationCB)( void );
+typedef uint32_t (*pfnIdleCB)( uint32_t );
+// Define function type that run LSI clock calibration callback
+typedef void (*pfnLSICalibrationCB)( void );
 // Define function type that get temperature callback
 typedef uint16_t (*pfnTempSampleCB)( void );
-// Define function type that connect event complete callback. timeUs - the time relative to next connect event ( only effect in single connection).
-typedef void (*pfnConnectEventCB)( uint32_t timeUs ); // Call LL_ConnectEventRegister to init
+// Define function type that connect/advertise event complete callback.
+typedef void (*pfnEventCB)( uint32_t timeUs );
 // Define function type that library status callback.
 typedef void (*pfnLibStatusErrorCB)( uint8_t code, uint32_t status );
 // Define function type that process event
@@ -140,26 +134,28 @@ typedef struct tag_ble_config
 {
     uint32_t MEMAddr;               // library memory start address
     uint16_t MEMLen;                // library memory size
-    uint32_t SNVAddr;               // SNV flash start address,must be data-flash area or NULL(bonding information will not be saved)
-    uint16_t SNVBlock;              // SNV flash block size ( default 512 )
+    uint32_t SNVAddr;               // SNV flash start address( if NULL,bonding information will not be saved )
+    uint16_t SNVBlock;              // SNV flash block size ( default 256 )
     uint8_t SNVNum;                 // SNV flash block number ( default 1 )
-    uint8_t BufMaxLen;              // The Controller supported the maximum length of the payload,Range 27-251,ATT_MTU = BufMaxLen-4 ( default 27 )
+    uint8_t BufMaxLen;              // Maximum length (in octets) of the data portion of each HCI data packet( default 27 )
+                                    // ATT_MTU = BufMaxLen-4,Range[23,ATT_MAX_MTU_SIZE]
     uint8_t BufNumber;              // Maximum number of sent and received packages cached by the controller( default 5 )
                                     // Must be greater than the number of connections.
     uint8_t TxNumEvent;             // Maximum number of TX data in a connection event ( default 1 )
     uint8_t TxPower;                // Maximum transmit power level( default LL_TX_POWEER_0_DBM(0dBm) )
-    uint8_t WakeUpTime;             // Wake up time value in one RTC count ( default 45 )
-    uint8_t SelRTCClock;            // RTC clock select LSE,LSI(32768Hz or 32000Hz)( default:0 LSE,1: LSI(32000Hz),2:LSI(32768Hz))
-                                    // bit7: select connect timer.0:RTC timer 1:system clock timer(must disable sleep)
+    uint8_t WakeUpTime;             // Wake up time value in one RTC count
+    uint8_t SelRTCClock;            // system clock select
+                                    // bit0-1 00: LSE(32768Hz) 01:LSI(32000Hz) 10:LSI(32768Hz)
+                                    // bit7:  1: ble timer(HSE)(must disable sleep)
     uint8_t RxNumEvent;             // Maximum number of RX data in a connection event ( default equal to BufNumber )
     uint8_t MacAddr[6];             // MAC address,little-endian( factory default )
     uint8_t ConnectNumber;          // Connect number,lower two bits are peripheral number,followed by central number
     uint8_t WindowWidening;         // Wait rf start window
     uint8_t WaitWindow;             // Wait event arrive window
     pfnSrandCB srandCB;             // Register a program that generate a random seed
-    pfnSleepCB sleepCB;             // Register a program that set idle mode
+    pfnIdleCB sleepCB;              // Register a program that set idle
     pfnTempSampleCB tsCB;           // Register a program that read the current temperature,determine whether calibration is need
-    pfnLSECalibrationCB rcCB;       // Register a program that RC32K clock calibration
+    pfnLSICalibrationCB rcCB;       // Register a program that LSI clock calibration
     pfnLibStatusErrorCB staCB;      // Register a program that library status callback
     pfnFlashReadCB readFlashCB;     // Register a program that read flash
     pfnFlashWriteCB writeFlashCB;   // Register a program that write flash
@@ -190,7 +186,7 @@ typedef struct
 /*********************************************************************
  * GLOBAL MACROS
  */
-#define  VER_FILE            "CH57x_BLE_LIB_V1.6"
+#define  VER_FILE            "CH57x_BLE_LIB_V1.8"
 extern const uint8_t VER_LIB[];  // LIB version
 #define SYSTEM_TIME_MICROSEN            625   // unit of process event timer is 625us
 #define MS1_TO_SYSTEM_TIME(x)  ((x)*1000/SYSTEM_TIME_MICROSEN)   // transform unit in ms to unit in 625us ( attentional bias )
@@ -260,10 +256,6 @@ extern const uint8_t VER_LIB[];  // LIB version
 //! Maximum Advertising Packet Length
 #define B_MAX_ADV_LEN                   31     // maximum legacy advertising packet length
 
-
-#ifndef SUCCESS
-#define SUCCESS                         0x00
-#endif
 #define FAILURE                         0x01   //!< Failure
 #define INVALIDPARAMETER                0x02   //!< Invalid request field
 #define INVALID_TASK                    0x03   //!< Task ID isn't setup properly
@@ -699,6 +691,7 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define GATT_CCC_TBL( pValue )          ( (gattCharCfg_t *)(*((PTR_TYPE)(&pValue))))
 
 /************************************ GAP *************************************/
+#define GAP_MSG_EVENT_DEFINES                        //!< GAP type of command
 #define GAP_DEVICE_INIT_DONE_EVENT              0x00 //!< Sent when the Device Initialization is complete.  This event is sent as an tmos message defined as gapDeviceInitDoneEvent_t.
 #define GAP_DEVICE_DISCOVERY_EVENT              0x01 //!< Sent when the Device Discovery Process is complete. This event is sent as an tmos message defined as gapDevDiscEvent_t.
 #define GAP_ADV_DATA_UPDATE_DONE_EVENT          0x02 //!< Sent when the Advertising Data or SCAN_RSP Data has been updated. This event is sent as an tmos message defined as gapAdvDataUpdateEvent_t.
@@ -784,15 +777,15 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define TGAP_CONN_EST_MAX_CE_LEN                16  //!< Local informational parameter about maximum length of connection needed.Default 0. (n * 0.625 mSec)
 
 // Proprietary
-#define TGAP_PRIVATE_ADDR_INT                   17  //!< Minimum Time Interval between private (resolvable) address changes.Default 15. (n * 1 minute)
+#define TGAP_PRIVATE_ADDR_INT                   17  //!< Minimum Time Interval between private (resolvable) address changes.Default 900. (n * 1 seconds)
 #define TGAP_SM_TIMEOUT                         18  //!< SM Message Timeout (milliseconds). Default 30 seconds.
 #define TGAP_SM_MIN_KEY_LEN                     19  //!< SM Minimum Key Length supported. Default 7.
 #define TGAP_SM_MAX_KEY_LEN                     20  //!< SM Maximum Key Length supported. Default 16.
 #define TGAP_FILTER_ADV_REPORTS                 21  //!< Filter duplicate advertising reports. Default TRUE.
-#define TGAP_SCAN_RSP_RSSI_MIN                  22  //!< Minimum RSSI required for scan responses to be reported to the app. Default -127.
+#define TGAP_SCAN_RSSI_MIN                      22  //!< Minimum RSSI required for scan advertising to be reported to the app. Default -127.
 #define TGAP_REJECT_CONN_PARAMS                 23  //!< Whether or not to reject Connection Parameter Update Request received on Central device. Default FALSE.
 #define TGAP_AUTH_TASK_ID                       24  //!< Task ID override for Task Authentication control (for stack internal use only)
-#define TGAP_PARAMID_MAX              25  //!< ID MAX-valid Parameter ID
+#define TGAP_PARAMID_MAX                        25  //!< ID MAX-valid Parameter ID
 
 // GAP_DEVDISC_MODE_DEFINES GAP Device Discovery Modes
 #define DEVDISC_MODE_NONDISCOVERABLE            0x00  //!< No discoverable setting
@@ -813,7 +806,8 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define GAP_ADTYPE_ADV_NONCONN_IND              0x03  //!< Non-Connectable undirected event type
 #define GAP_ADTYPE_ADV_LDC_DIRECT_IND           0x04  //!< Connectable low duty cycle directed event type
 
-// GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES GAP Advertising Report Event Types
+// GAP Advertising Report Event Types
+#define GAP_ADVERTISEMENT_REPORT_TYPE_DEFINES
 #define GAP_ADRPT_ADV_IND                       0x00  //!< Connectable undirected advertisement
 #define GAP_ADRPT_ADV_DIRECT_IND                0x01  //!< Connectable directed advertisement
 #define GAP_ADRPT_ADV_SCAN_IND                  0x02  //!< Scannable undirected advertisement
@@ -1010,6 +1004,18 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define GAPBOND_FAIL_TERMINATE_LINK             0x02 //!< Terminate link upon unsuccessful bonding
 #define GAPBOND_FAIL_TERMINATE_ERASE_BONDS      0x03 //!< Terminate link and erase all existing bonds on device upon unsuccessful bonding
 
+// Device NV Items
+#define BLE_NVID_IRK                            0x02  //!< The Device's IRK
+#define BLE_NVID_CSRK                           0x03  //!< The Device's CSRK
+#define BLE_NVID_SIGNCOUNTER                    0x04  //!< The Device's Sign Counter
+
+//!< RF Mode BOND NV IDs
+#define BLE_NVID_BOND_RF_START                  0x10  //!< Start of the RF BOND NV IDs
+
+// Bonding NV Items - Range 0x20 - 0x6F
+#define BLE_NVID_GAP_BOND_START                 0x20  //!< Start of the GAP Bond Manager's NV IDs
+
+// GAP BOND Items
 #define GAP_BOND_REC_ID_OFFSET                  0 //!< NV ID for the main bonding record
 #define GAP_BOND_LOCAL_LTK_OFFSET               1 //!< NV ID for the bonding record's local LTK information
 #define GAP_BOND_DEV_LTK_OFFSET                 2 //!< NV ID for the bonding records' device LTK information
@@ -1017,15 +1023,6 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define GAP_BOND_DEV_CSRK_OFFSET                4 //!< NV ID for the bonding records' device CSRK
 #define GAP_BOND_DEV_SIGN_COUNTER_OFFSET        5 //!< NV ID for the bonding records' device Sign Counter
 #define GAP_BOND_REC_IDS                        6
-
-// Bonding NV Items -   START  0x20   
-#define BLE_NVID_GAP_BOND_START                 0x20  //!< Start of the GAP Bond Manager's NV IDs
-
-// GATT Configuration NV Items - START  0x70 
-#define BLE_NVID_GATT_CFG_START                 0x70  //!< Start of the GATT Configuration NV IDs
-
-// RF BOND Configuration 
-#define BLE_NVID_BOND_RF_START                  0x60  //!< Start of the RF BOND NV IDs
 
 // Macros to calculate the index/offset in to NV space
 #define calcNvID(Idx, offset)           (((((Idx) * GAP_BOND_REC_IDS) + (offset))) + BLE_NVID_GAP_BOND_START)
@@ -1035,8 +1032,14 @@ extern const uint8_t VER_LIB[];  // LIB version
 #define devIRKNvID(bondIdx)             (calcNvID((bondIdx), GAP_BOND_DEV_IRK_OFFSET))
 #define devCSRKNvID(bondIdx)            (calcNvID((bondIdx), GAP_BOND_DEV_CSRK_OFFSET))
 #define devSignCounterNvID(bondIdx)     (calcNvID((bondIdx), GAP_BOND_DEV_SIGN_COUNTER_OFFSET))
+
+// GATT Configuration NV Items -Range 0x70 - 0x7F
+#define BLE_NVID_GATT_CFG_START                 0x70  //!< Start of the GATT Configuration NV IDs
+
 // Macros to calculate the GATT index/offset in to NV space
 #define gattCfgNvID(Idx)                ((Idx) + BLE_NVID_GATT_CFG_START)
+
+#define BLE_NVID_MAX_VAL                        0x7F
 
 // Structure of NV data for the connected device's encryption information
 typedef struct
@@ -1827,6 +1830,7 @@ typedef struct
     uint8_t uiInputs;               //!< Pairing User Interface Inputs - Ask user to input passcode
     uint8_t uiOutputs;              //!< Pairing User Interface Outputs - Display passcode
 } gapPasskeyNeededEvent_t;
+
 /**
  * Passcode Callback Function
  */
@@ -1951,6 +1955,7 @@ typedef struct
  * Central Event Callback Function
  */
 typedef void (*pfnGapCentralRoleEventCB_t)( gapRoleEvent_t *pEvent ); //!< Pointer to event structure.
+
 /**
  * HCI Data Length Change Event Callback Function
  */
@@ -1962,7 +1967,7 @@ typedef void (*pfnHciDataLenChangeEvCB_t)( uint16_t connHandle, uint16_t maxTxOc
  */
 typedef struct
 {
-    gapRolesRssiRead_t rssiCB;          //!< RSSI callback.
+    gapRolesRssiRead_t rssiCB;  //!< RSSI callback.
     pfnGapCentralRoleEventCB_t eventCB;  //!< Event callback.
     pfnHciDataLenChangeEvCB_t ChangCB;  //!< Length Change Event Callback .
 } gapCentralRoleCB_t; // gapCentralRoleCB_t
@@ -1995,6 +2000,11 @@ typedef struct
 // LLE_MODE_TYPE
 #define  LLE_MODE_BASIC               (0)   //!< basic mode, enter idle state after sending or receive
 #define  LLE_MODE_AUTO                (1)   //!< auto mode, auto swtich to the receiving status after sending and the sending status after receiving
+
+// LLE_WHITENING_TYPE
+#define  LLE_WHITENING_ON             (0<<1)
+#define  LLE_WHITENING_OFF            (1<<1)
+
 #define  LLE_MODE_EX_CHANNEL          (1<<6)
 
 #define  LLE_MODE_NON_RSSI            (1<<7)
@@ -2009,41 +2019,44 @@ typedef void (*pfnRFStatusCB_t)( uint8_t sta, uint8_t rsr, uint8_t *rxBuf );
 
 typedef struct tag_rf_config
 {
-    uint8_t LLEMode;                 //!< BIT0   0=LLE_MODE_BASIC, 1=LLE_MODE_AUTO
-                                     //!< BIT6   0=data channel(0-39)
-                                     //!<        1=rf frequency (2400000kHz-2483500kHz)
-                                     //!< BIT7   0=the first byte of the receive buffer is rssi
-                                     //!<        1=the first byte of the receive buffer is package type
-    uint8_t Channel;                 //!< rf channel(0-39)
-    uint32_t Frequency;              //!< rf frequency (2400000kHz-2483500kHz)
-    uint32_t accessAddress;          //!< access address,32bit PHY address
-    uint32_t CRCInit;                //!< crc initial value
-    pfnRFStatusCB_t rfStatusCB;      //!< status call back
-    uint32_t ChannelMap;             //!< indicating  Used and Unused data channels.Every channel is represented with a
-                                     //!< bit positioned as per the data channel index,The LSB represents data channel index 0
+    uint8_t LLEMode;                  //!< BIT0   0=basic, 1=auto def@LLE_MODE_TYPE
+                                      //!< BIT1   0=whitening on, 1=whitening off def@LLE_WHITENING_TYPE
+                                      //!< BIT6   0=data channel(0-39)
+                                      //!<        1=rf frequency (2400000kHz-2483500kHz)
+                                      //!< BIT7   0=the first byte of the receive buffer is rssi
+                                      //!<        1=the first byte of the receive buffer is package type
+    uint8_t Channel;                  //!< rf channel(0-39)
+    uint32_t Frequency;               //!< rf frequency (2400000kHz-2483500kHz)
+    uint32_t accessAddress;           //!< access address,32bit PHY address
+    uint32_t CRCInit;                 //!< crc initial value
+    pfnRFStatusCB_t rfStatusCB;       //!< status call back
+    uint32_t ChannelMap;              //!< indicating  Used and Unused data channels.Every channel is represented with a
+                                      //!< bit positioned as per the data channel index,The LSB represents data channel index 0
     uint8_t Resv;
-    uint8_t HeartPeriod;             //!< The heart package interval shall be an integer multiple of 100ms
-    uint8_t HopPeriod;               //!< hop period( T=32n*RTC clock ),default is 8
-    uint8_t HopIndex;                //!< indicate the hopIncrement used in the data channel selection algorithm,default is 17
-    uint8_t RxMaxlen;                //!< Maximum data length received in rf-mode(default 255)
-    uint8_t TxMaxlen;                //!< Maximum data length transmit in rf-mode(default 255)
+    uint8_t HeartPeriod;              //!< The heart package interval shall be an integer multiple of 100ms
+    uint8_t HopPeriod;                //!< hop period( T=32n*RTC clock ),default is 8
+    uint8_t HopIndex;                 //!< indicate the hopIncrement used in the data channel selection algorithm,default is 17
+    uint8_t RxMaxlen;                 //!< Maximum data length received in rf-mode(default 251)
+    uint8_t TxMaxlen;                 //!< Maximum data length transmit in rf-mode(default 251)
 } rfConfig_t;
 
 /* end define@RF-PHY */
 
 /******************************************************************************/
+#ifndef LIB_FLASH_BASE_ADDRESSS
 #define LIB_FLASH_BASE_ADDRESSS   0x00010000
+#endif
 #define LIB_FLASH_MAX_SIZE        0x00020000
 
 #define RAM_BASE_ADDRESSS         0x20004800
-#define UUID_BASE_ADDRESSS        0x00010008
-#define FUNCITON_BASE_ADDRESSS    0x00010034
+#define UUID_BASE_ADDRESSS        (LIB_FLASH_BASE_ADDRESSS+0x08)
+#define FUNCITON_BASE_ADDRESSS    (LIB_FLASH_BASE_ADDRESSS+0x34)
 
 #define  BLE_LIB_UUID(n) ( UUID_BASE_ADDRESSS+n*2 )
 #define  BLE_LIB_JT(n) (*(uint32_t*)( FUNCITON_BASE_ADDRESSS+n*4 ))
 #define  VER_LIB  ((  const uint8_t*)      BLE_LIB_JT(0))
 
-/*********************************************************************
+/*******************************************************************************
  * UUID defined
  */
 /**
@@ -2100,7 +2113,7 @@ typedef struct tag_rf_config
  * @param   taskID - task ID of event
  * @param   event - event value
  *
- * @return  0 - success.
+ * @return  0 - SUCCESS.
  */
 #define    tmos_set_event  ((  bStatus_t  (*)  ( tmosTaskID taskID, tmosEvents event ))  BLE_LIB_JT(7))
 
@@ -2110,7 +2123,7 @@ typedef struct tag_rf_config
  * @param   taskID - task ID of event
  * @param   event - event value
  *
- * @return  0 - success.
+ * @return  0 - SUCCESS.
  */
 #define    tmos_clear_event  ((  bStatus_t  (*)  ( tmosTaskID taskID, tmosEvents event ))  BLE_LIB_JT(8))
 
@@ -2121,9 +2134,9 @@ typedef struct tag_rf_config
  * @param   event - event to be notified with
  * @param   time - timeout value
  *
- * @return  TRUE - success.
+ * @return  TRUE,FALSE.
  */
-#define    tmos_start_task  ((  bStatus_t  (*)  ( tmosTaskID taskID, tmosEvents event, tmosTimer time  ))  BLE_LIB_JT(9))
+#define    tmos_start_task  ((  BOOL  (*)  ( tmosTaskID taskID, tmosEvents event, tmosTimer time  ))  BLE_LIB_JT(9))
 
 /**
  * @brief   This function is called to start a timer to expire in n system clock time.
@@ -2146,7 +2159,7 @@ typedef struct tag_rf_config
  *
  * @param   None.
  *
- * @return  0 - success. 
+ * @return  SUCCESS.
  */
 #define    tmos_stop_task  ((  bStatus_t  (*)  ( tmosTaskID taskID, tmosEvents event ))  BLE_LIB_JT(10))
 
@@ -2175,7 +2188,7 @@ typedef struct tag_rf_config
  *
  * @param  *msg_ptr - point of msg
  *
- * @return  0 - success. 
+ * @return  SUCCESS.
  */
 #define    tmos_msg_deallocate  ((  bStatus_t  (*)  ( uint8_t *msg_ptr ))  BLE_LIB_JT(13))
 
@@ -2211,10 +2224,12 @@ typedef struct tag_rf_config
 /**
  * @brief   tmos system timer initialization
  *
+ * @note    must initialization before call tmos task
+ *
  * @param   fnGetClock - 0:system clock select RTC timer
  *                   valid:system clock select extend input
  *
- * @return  Command Status.
+ * @return  SUCCESS if successful, FAILURE if failed.
  */
 #define    TMOS_TimerInit  ((  bStatus_t (*)  ( pfnGetSysClock fnGetClock ))  BLE_LIB_JT(16))
 
@@ -2246,18 +2261,12 @@ typedef struct tag_rf_config
 #define    TMOS_ProcessEventRegister  ((  tmosTaskID (*)  ( pTaskEventHandlerFn eventCb ))  BLE_LIB_JT(19))
 
 /**
- * @brief
+ * @brief   set LSE calibration value
  *
- * input parameters
+ * @param   flash_val - the value of flash
+ * @param   ram_val - the value of ram
  *
- * @param       flash_val
- * @param       ram_val
- *
- * output parameters
- *
- * @param       None.
- *
- * @return      None.
+ * @return  None.
  */
 #define    TMOS_Set32KTuneValue  ((  void  (*)  ( uint16_t flash_val, uint16_t ram_val ))  BLE_LIB_JT(120) )
 
@@ -2325,11 +2334,20 @@ typedef struct tag_rf_config
  * @brief   Register a callback function will be called after each connect event.
  *          Only effect in single connection
  *
- * @param   connectEventCB - callback function
+ * @param   connEventCB - callback function
  *
  * @return  None.
  */
-#define    LL_ConnectEventRegister  ((  void  (*)  ( pfnConnectEventCB connectEventCB ))  BLE_LIB_JT(26))
+#define    LL_ConnectEventRegister  ((  void  (*)  ( pfnEventCB connEventCB ))  BLE_LIB_JT(26))
+
+/**
+ * @brief   Register a callback function will be called after each advertise event.
+ *
+ * @param   advEventCB - callback function
+ *
+ * @return  None.
+ */
+#define   LL_AdvertiseEventRegister ((  void  (*) ( pfnEventCB advEventCB ))  BLE_LIB_JT(128))
 
 /**
  * @brief   set tx power level
@@ -2399,7 +2417,7 @@ typedef struct tag_rf_config
  * It shall not be a sequence that differ s from the advertising channel packets' Access Address by only one bit.
  * It shall not have all four octets equal.
  * It shall have no more  than 24 transitions.
- * It shall have a minimum of two transitio ns in the most significant six bits.
+ * It shall have a minimum of two transitions in the most significant six bits.
  */
 #define    BLE_AccessAddressGenerate  ((  void  (*)  ( void ))  BLE_LIB_JT(29))
 
@@ -2426,7 +2444,7 @@ typedef struct tag_rf_config
  *            connectionHandle - controller link connection handle.
  *            returns TRUE if the link is up. FALSE, otherwise.
  */
-#define linkDB_Up( connectionHandle )  linkDB_State( (connectionHandle), LINK_CONNECTED )
+#define    linkDB_Up( connectionHandle )  linkDB_State( (connectionHandle), LINK_CONNECTED )
 
 /**
  * @brief   This function is used to get the MTU size of a connection.
@@ -2852,6 +2870,7 @@ typedef struct tag_rf_config
  *          bleTimeout: Previous transaction timed out.<BR>
  */
 #define    GATT_ReadUsingCharUUID  ((  bStatus_t  (*)  ( uint16_t connHandle, attReadByTypeReq_t *pReq, uint8_t taskId ))  BLE_LIB_JT(49) )
+
 /**
  * @brief   This sub-procedure is used to read a Characteristic Value from
  *          a server when the client knows the Characteristic Value Handle
@@ -3105,6 +3124,7 @@ typedef struct tag_rf_config
  *          bleTimeout: Previous transaction timed out.<BR>
  */
 #define    GATT_ReliableWrites  ((  bStatus_t  (*)  ( uint16_t connHandle, attPrepareWriteReq_t *pReqs,uint8_t numReqs, uint8_t flags, uint8_t taskId ))  BLE_LIB_JT(56) )
+
 /**
  * @brief   This sub-procedure is used to read a characteristic descriptor
  *          from a server when the client knows the characteristic descriptor
@@ -3545,6 +3565,17 @@ typedef struct tag_rf_config
  */
 #define    GAPBondMgr_PasscodeRsp  ((  bStatus_t  (*)  ( uint16_t connectionHandle, uint8_t status, uint32_t passcode ))  BLE_LIB_JT(79) )
 
+/**
+ * @brief   Send a security request
+ *
+ * @param   connHandle - connection handle
+ *
+ * @return  SUCCESS: will send
+ *          bleNotConnected: Link not found
+ *          bleIncorrectMode: wrong GAP role, must be a Peripheral Role
+ */
+#define   GAPBondMgr_PeriSecurityReq  ((  bStatus_t (*) ( uint16_t connHandle ))  BLE_LIB_JT(129) )
+
 /*-------------------------------------------------------------------
  * FUNCTIONS - GAPRole API
  */
@@ -3614,32 +3645,30 @@ typedef struct tag_rf_config
  * FUNCTIONS - BROADCASTER_PROFILE_API Broadcaster Profile API
  */
 /**
- * @internal
  *
- * @brief       Initialization function for the GAP Role Task.
+ * @brief   Initialization function for the GAP Role Task.
  *
- * @param       the ID assigned by tmos.  This ID should be
- *                    used to send messages and set timers.
+ * @param   the ID assigned by tmos.This ID should be used to send messages and set timers.
  *
- * @return      SUCCESS,bleInvalidRange
+ * @return  SUCCESS,bleInvalidRange
  */
 #define    GAPRole_BroadcasterInit  ((  bStatus_t  (*)  ( void ))  BLE_LIB_JT(85) )
 
 /**
- * @brief       Does the device initialization.  Only call this function once.
+ * @brief   Does the device initialization.  Only call this function once.
  *
- * @param       pAppCallbacks - pointer to application callbacks.
+ * @param   pAppCallbacks - pointer to application callbacks.
  *
- * @return      SUCCESS or bleAlreadyInRequestedMode
+ * @return  SUCCESS or bleAlreadyInRequestedMode
  */
 #define    GAPRole_BroadcasterStartDevice  ((  bStatus_t  (*)  ( gapRolesBroadcasterCBs_t *pAppCallbacks ))  BLE_LIB_JT(86) )
 
 /**
- * @brief       Does the Broadcaster receive scan request call initialization.
+ * @brief   Does the Broadcaster receive scan request call initialization.
  *
- * @param       pAppCallbacks - pointer to application callbacks.
+ * @param   pAppCallbacks - pointer to application callbacks.
  *
- * @return      None
+ * @return  None
  */
 #define    GAPRole_BroadcasterSetCB  ((  void  (*)  (gapRolesBroadcasterCBs_t *pAppCallbacks  ))  BLE_LIB_JT(106) )
 
@@ -3696,39 +3725,38 @@ typedef struct tag_rf_config
 /**
  * @internal
  *
- * @brief       Initialization function for the GAP Role Task.
+ * @brief   Initialization function for the GAP Role Task.
  *          This is called during initialization and should contain
  *          any application specific initialization (ie. hardware
  *          initialization/setup, table initialization, power up
  *          notificaiton ... ).
  *
- * @param       the ID assigned by tmos.  This ID should be
- *                    used to send messages and set timers.
+ * @param   the ID assigned by tmos.This ID should be used to send messages and set timers.
  *
- * @return      SUCCESS,bleInvalidRange
+ * @return  SUCCESS,bleInvalidRange
  */
 #define    GAPRole_PeripheralInit  ((  bStatus_t  (*)  ( void ))  BLE_LIB_JT(91) )
 
 /**
- * @brief       Does the device initialization.  Only call this function once.
+ * @brief   Does the device initialization.  Only call this function once.
  *
- * @param       pAppCallbacks - pointer to application callbacks.
+ * @param   pAppCallbacks - pointer to application callbacks.
  *
- * @return      SUCCESS or bleAlreadyInRequestedMode  
+ * @return  SUCCESS or bleAlreadyInRequestedMode
  */
 #define    GAPRole_PeripheralStartDevice  ((  bStatus_t  (*)  ( uint8_t taskid, gapBondCBs_t *pCB,gapRolesCBs_t *pAppCallbacks ))  BLE_LIB_JT(92) )
 
 /**
- * @brief       Update the parameters of an existing connection
+ * @brief   Update the parameters of an existing connection
  *
- * @param       connHandle - the connection Handle
- * @param       connIntervalMin - minimum connection interval in 1.25ms units
- * @param       connIntervalMax - maximum connection interval in 1.25ms units
- * @param       latency - the new slave latency
- * @param       connTimeout - the new timeout value
- * @param       taskId - taskID will recv L2CAP_SIGNAL_EVENT message
+ * @param   connHandle - the connection Handle
+ * @param   connIntervalMin - minimum connection interval in 1.25ms units
+ * @param   connIntervalMax - maximum connection interval in 1.25ms units
+ * @param   latency - the new slave latency
+ * @param   connTimeout - the new timeout value
+ * @param   taskId - taskID will recv L2CAP_SIGNAL_EVENT message
  *
- * @return      SUCCESS, bleNotConnected or bleInvalidRange
+ * @return  SUCCESS, bleNotConnected or bleInvalidRange
  */
 #define    GAPRole_PeripheralConnParamUpdateReq  ((  bStatus_t  (*)  ( uint16_t connHandle, uint16_t connIntervalMin,\
     uint16_t connIntervalMax,uint16_t latency, uint16_t connTimeout,uint8_t taskId ))  BLE_LIB_JT(93) )

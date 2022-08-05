@@ -191,13 +191,13 @@ void ADC_AutoConverCycle(uint8_t cycle);
 void ADC_DMACfg(uint8_t s, uint16_t startAddr, uint16_t endAddr, ADC_DMAModeTypeDef m);
 
 /**
- * @brief   获取当前采样的温度值（℃）
+ * @brief   Convert ADC value to temperature(Celsius)
  *
- * @param   ts_v    - 当前温度传感器采样输出
+ * @param   adc_val - adc value
  *
- * @return  转换后的温度值（℃）
+ * @return  temperature (Celsius)
  */
-int ADC_GetCurrentTS(uint16_t ts_v);
+int adc_to_temperature_celsius(uint16_t adc_val);
 
 /**
  * @brief   获取ADC转换值

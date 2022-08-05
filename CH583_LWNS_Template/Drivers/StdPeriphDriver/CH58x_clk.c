@@ -132,9 +132,9 @@ void LSECFG_Capacitance(LSECapTypeDef c)
  *
  * @brief   校准内部32K时钟
  *
- * @param   cali_Lv - 校准等级选择    Level_32  -   用时 1.2ms 1000ppm (32M 主频)  1100ppm (64M 主频)
- *                              Level_64  -   用时 2.2ms 800ppm  (32M 主频)  1000ppm (64M 主频)
- *                              Level_128 -   用时 4.2ms 600ppm  (32M 主频)  800ppm  (64M 主频)
+ * @param   cali_Lv - 校准等级选择    Level_32  -   用时 1.2ms 1000ppm (32M 主频)  1100ppm (60M 主频)
+ *                              Level_64  -   用时 2.2ms 800ppm  (32M 主频)  1000ppm (60M 主频)
+ *                              Level_128 -   用时 4.2ms 600ppm  (32M 主频)  800ppm  (60M 主频)
  *
  * @return  none
  */
@@ -165,6 +165,13 @@ void Calibration_LSI(Cali_LevelTypeDef cali_Lv)
     SAFEOPERATE;
     R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
     R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
+    while( (R8_OSC_CAL_CTRL&RB_OSC_CNT_EN)!= RB_OSC_CNT_EN )
+    {
+        R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
+        R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
+        SAFEOPERATE;
+        R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+    }
     while(1)
     {
         while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT));
@@ -400,6 +407,10 @@ void RTC_TRIGFunCfg(uint32_t cyc)
     uint32_t t;
 
     t = RTC_GetCycle32k() + cyc;
+    if(t > 0xA8C00000)
+    {
+        t -= 0xA8C00000;
+    }
 
     R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
     R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;

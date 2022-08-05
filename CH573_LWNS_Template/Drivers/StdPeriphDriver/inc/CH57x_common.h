@@ -39,10 +39,14 @@ extern "C" {
 /**
  * @brief  32K ±÷”£®Hz£©
  */
-#if(CLK_OSC32K == 1)
-  #define CAB_LSIFQ    32000
+#ifdef CLK_OSC32K
+#if ( CLK_OSC32K == 1 )
+#define CAB_LSIFQ       32000
 #else
-  #define CAB_LSIFQ    32768
+#define CAB_LSIFQ       32768
+#endif
+#else
+#define CAB_LSIFQ       32000
 #endif
 
 #include <string.h>
