@@ -4,8 +4,10 @@
  * Version            : V1.2
  * Date               : 2021/11/17
  * Description
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 #ifndef __CH58x_SYS_H__
@@ -164,6 +166,26 @@ void mDelayuS(uint16_t t);
  * @param   t       - 时间参数
  */
 void mDelaymS(uint16_t t);
+
+/**
+ * @brief Enter safe access mode.
+ * 
+ * @NOTE: After enter safe access mode, about 16 system frequency cycles 
+ * are in safe mode, and one or more secure registers can be rewritten 
+ * within the valid period. The safe mode will be automatically 
+ * terminated after the above validity period is exceeded.
+ */
+ __attribute__((always_inline)) static inline void sys_safe_access_enable(void)
+{
+    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
+    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
+    SAFEOPERATE;
+}
+
+__attribute__((always_inline)) static inline void sys_safe_access_disable(void)
+{
+    R8_SAFE_ACCESS_SIG = 0;
+}
 
 #ifdef __cplusplus
 }

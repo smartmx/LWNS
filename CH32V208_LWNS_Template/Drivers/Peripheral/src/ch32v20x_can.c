@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2021/06/06
  * Description        : This file provides all the CAN firmware functions.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v20x_can.h"
 #include "ch32v20x_rcc.h"
 
@@ -230,13 +232,14 @@ void CAN_FilterInit(CAN_FilterInitTypeDef* CAN_FilterInitStruct)
   }
 
 #if defined (CH32V20x_D6)
-    {
-        uint32_t i;
+  if(((*(uint32_t *) 0x40022030) & 0x0F000000) == 0)
+  {
+    uint32_t i;
 
-        for(i = 0; i < 64; i++){
-            *(__IO uint16_t *)(0x40006000 + 512 + 4 * i) = *(__IO uint16_t *)(0x40006000 + 768 + 4 * i);
-        }
+    for(i = 0; i < 64; i++){
+        *(__IO uint16_t *)(0x40006000 + 512 + 4 * i) = *(__IO uint16_t *)(0x40006000 + 768 + 4 * i);
     }
+  }
 
 #endif
 
@@ -338,6 +341,9 @@ void CAN_DBGFreeze(CAN_TypeDef* CANx, FunctionalState NewState)
  *
  * @param   CANx - where x can be 1 to select the CAN peripheral.
  *          NewState - ENABLE or DISABLE.
+ *          Note-
+ *          DLC must be programmed as 8 in order Time Stamp (2 bytes) to be 
+ *          sent over the CAN bus. 
  *
  * @return  none
  */
@@ -806,7 +812,13 @@ uint8_t CAN_GetLastErrorCode(CAN_TypeDef* CANx)
  * @brief   Returns the CANx Receive Error Counter (REC).
  *
  * @param   CANx - where x can be 1 to select the CAN peripheral.
- *
+ *         Note-   
+ *         In case of an error during reception, this counter is incremented 
+ *         by 1 or by 8 depending on the error condition as defined by the CAN 
+ *         standard. After every successful reception, the counter is 
+ *         decremented by 1 or reset to 120 if its value was higher than 128. 
+ *         When the counter value exceeds 127, the CAN controller enters the 
+ *         error passive state.  
  * @return  counter - CAN Receive Error Counter.
  */
 uint8_t CAN_GetReceiveErrorCounter(CAN_TypeDef* CANx)

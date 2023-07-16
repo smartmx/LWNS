@@ -4,8 +4,10 @@
  * Version            : V1.2
  * Date               : 2021/11/17
  * Description
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 #ifndef __CH57x_CLK_H__
@@ -121,7 +123,7 @@ typedef enum
 #define BEGYEAR                   2020
 #define IsLeapYear(yr)            (!((yr) % 400) || (((yr) % 100) && !((yr) % 4)))
 #define YearLength(yr)            (IsLeapYear(yr) ? 366 : 365)
-#define monthLength(lpyr, mon)    ((mon == 1) ? (28 + lpyr) : ((mon > 6) ? ((mon & 1) ? 31 : 30) : ((mon & 1) ? 30 : 31)))
+#define monthLength(lpyr, mon)    (((mon) == 1) ? (28 + (lpyr)) : (((mon) > 6) ? (((mon) & 1) ? 31 : 30) : (((mon) & 1) ? 30 : 31)))
 
 /**
  * @brief  rtc timer mode period define

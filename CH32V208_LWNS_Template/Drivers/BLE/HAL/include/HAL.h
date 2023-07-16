@@ -4,8 +4,10 @@
  * Version            : V1.0
  * Date               : 2016/05/05
  * Description        :
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 /******************************************************************************/
@@ -38,12 +40,12 @@ extern tmosTaskID halTaskID;
  */
 
 /**
- * @brief   硬件初始化
+ * @brief   Hardware initialization
  */
 extern void HAL_Init(void);
 
 /**
- * @brief   硬件层事务处理
+ * @brief   HAL processing
  *
  * @param   task_id - The TMOS assigned task ID.
  * @param   events - events to process.  This is a bit map and can
@@ -52,19 +54,21 @@ extern void HAL_Init(void);
 extern tmosEvents HAL_ProcessEvent(tmosTaskID task_id, tmosEvents events);
 
 /**
- * @brief   BLE 库初始化
+ * @brief   Initialization of the BLE library
  */
 extern void WCHBLE_Init(void);
 
 /**
- * @brief   获取内部温感采样值，如果使用了ADC中断采样，需在此函数中暂时屏蔽中断.
+ * @brief   Get the internal temperature sampling value. 
+ *          If the ADC interrupt sampling is used, 
+ *          the interrupt is temporarily shielded in this function.
  *
- * @return  内部温感采样值.
+ * @return  Internal temperature sampling value.
  */
 extern uint16_t HAL_GetInterTempValue(void);
 
 /**
- * @brief   内部32k校准
+ * @brief   Internal 32K calibration
  */
 extern void Lib_Calibration_LSI(void);
 

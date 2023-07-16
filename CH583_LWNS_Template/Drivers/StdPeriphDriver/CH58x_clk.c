@@ -4,8 +4,10 @@
  * Version            : V1.2
  * Date               : 2021/11/17
  * Description
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 #include "CH58x_common.h"
@@ -21,18 +23,20 @@
  */
 void LClk32K_Select(LClk32KTypeDef hc)
 {
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    uint8_t cfg = R8_CK32K_CONFIG;
+
     if(hc == Clk32K_LSI)
     {
-        R8_CK32K_CONFIG &= ~RB_CLK_OSC32K_XT;
+        cfg &= ~RB_CLK_OSC32K_XT;
     }
     else
     {
-        R8_CK32K_CONFIG |= RB_CLK_OSC32K_XT;
+        cfg |= RB_CLK_OSC32K_XT;
     }
-    R8_SAFE_ACCESS_SIG = 0;
+
+    sys_safe_access_enable();
+    R8_CK32K_CONFIG = cfg;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -51,11 +55,9 @@ void HSECFG_Current(HSECurrentTypeDef c)
     x32M_c = R8_XT32M_TUNE;
     x32M_c = (x32M_c & 0xfc) | (c & 0x03);
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_XT32M_TUNE = x32M_c;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -74,11 +76,9 @@ void HSECFG_Capacitance(HSECapTypeDef c)
     x32M_c = R8_XT32M_TUNE;
     x32M_c = (x32M_c & 0x8f) | (c << 4);
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_XT32M_TUNE = x32M_c;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -97,11 +97,9 @@ void LSECFG_Current(LSECurrentTypeDef c)
     x32K_c = R8_XT32K_TUNE;
     x32K_c = (x32K_c & 0xfc) | (c & 0x03);
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_XT32K_TUNE = x32K_c;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -120,11 +118,9 @@ void LSECFG_Capacitance(LSECapTypeDef c)
     x32K_c = R8_XT32K_TUNE;
     x32K_c = (x32K_c & 0x0f) | (c << 4);
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_XT32K_TUNE = x32K_c;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -132,9 +128,9 @@ void LSECFG_Capacitance(LSECapTypeDef c)
  *
  * @brief   校准内部32K时钟
  *
- * @param   cali_Lv - 校准等级选择    Level_32  -   用时 1.2ms 1000ppm (32M 主频)  1100ppm (60M 主频)
- *                              Level_64  -   用时 2.2ms 800ppm  (32M 主频)  1000ppm (60M 主频)
- *                              Level_128 -   用时 4.2ms 600ppm  (32M 主频)  800ppm  (60M 主频)
+ * @param   cali_Lv - 校准等级选择    Level_32 ：2.4ms   1000ppm (32M 主频)  1100ppm (60M 主频)
+ *                                   Level_64 ：4.4ms   800ppm  (32M 主频)  1000ppm (60M 主频)
+ *                                   Level_128 ：8.4ms  600ppm  (32M 主频)  800ppm  (60M 主频)                                                         
  *
  * @return  none
  */
@@ -144,73 +140,113 @@ void Calibration_LSI(Cali_LevelTypeDef cali_Lv)
     INT32  cnt_offset;
     UINT8  retry = 0;
     INT32  freq_sys;
+    UINT32 cnt_32k = 0;
 
     freq_sys = GetSysClock();
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+
+    sys_safe_access_enable();
     R8_CK32K_CONFIG |= RB_CLK_OSC32K_FILT;
     R8_CK32K_CONFIG &= ~RB_CLK_OSC32K_FILT;
+    sys_safe_access_enable();
     R8_XT32K_TUNE &= ~3;
     R8_XT32K_TUNE |= 1;
 
     // 粗调
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_OSC_CAL_CTRL &= ~RB_OSC_CNT_TOTAL;
     R8_OSC_CAL_CTRL |= 1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
-    R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
-    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
-    while( (R8_OSC_CAL_CTRL&RB_OSC_CNT_EN)!= RB_OSC_CNT_EN )
-    {
-        R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-        R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-        SAFEOPERATE;
-        R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
-    }
+
     while(1)
     {
-        while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT));
-        i = R16_OSC_CAL_CNT; // 用于丢弃
+        sys_safe_access_enable();
+        R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+        R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
+        R16_OSC_CAL_CNT |= RB_OSC_CAL_IF;
+        while( (R8_OSC_CAL_CTRL & RB_OSC_CNT_EN) == 0 )
+        {
+            sys_safe_access_enable();
+            R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+        }
+
+        while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT)); // 用于丢弃
+        
+        sys_safe_access_enable();
+        R8_OSC_CAL_CTRL &= ~RB_OSC_CNT_EN;
+        R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+        R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
+        R16_OSC_CAL_CNT |= RB_OSC_CAL_IF;
+        while( (R8_OSC_CAL_CTRL & RB_OSC_CNT_EN) == 0 )
+        {
+            sys_safe_access_enable();
+            R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+        }
+
         while(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT);
+        cnt_32k = RTC_GetCycle32k();
+        while(RTC_GetCycle32k() == cnt_32k);
         R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
         while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT));
         i = R16_OSC_CAL_CNT; // 实时校准后采样值
         cnt_offset = (i & 0x3FFF) + R8_OSC_CAL_OV_CNT * 0x3FFF - 2000 * (freq_sys / 1000) / CAB_LSIFQ;
         if(((cnt_offset > -37 * (freq_sys / 1000) / CAB_LSIFQ) && (cnt_offset < 37 * (freq_sys / 1000) / CAB_LSIFQ)) || retry > 2)
-            break;
+        {
+            if(retry)
+                break;
+        }
         retry++;
-        cnt_offset = (cnt_offset > 0) ? (((cnt_offset * 2) / (37 * (freq_sys / 1000) / CAB_LSIFQ)) + 1) / 2 : (((cnt_offset * 2) / (37 * (freq_sys / 1000) / CAB_LSIFQ)) - 1) / 2;
-        R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-        R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-        SAFEOPERATE;
+        cnt_offset = (cnt_offset > 0) ? (((cnt_offset * 2) / (74 * (freq_sys/1000) / 60000)) + 1) / 2 : (((cnt_offset * 2) / (74 * (freq_sys/1000) / 60000 )) - 1) / 2;
+        sys_safe_access_enable();
         R16_INT32K_TUNE += cnt_offset;
     }
 
     // 细调
     // 配置细调参数后，丢弃2次捕获值（软件行为）上判断已有一次，这里只留一次
-    while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT));
-    i = R16_OSC_CAL_CNT; // 用于丢弃
-    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_OSC_CAL_CTRL &= ~RB_OSC_CNT_TOTAL;
     R8_OSC_CAL_CTRL |= cali_Lv;
-    while(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT);
-    while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT));
-    i = R16_OSC_CAL_CNT; // 实时校准后采样值
-    cnt_offset = (i & 0x3FFF) + R8_OSC_CAL_OV_CNT * 0x3FFF - 4000 * (1 << cali_Lv) * (freq_sys / 1000000) / CAB_LSIFQ * 1000;
-    cnt_offset = (cnt_offset > 0) ? ((((cnt_offset * (3200 / (1 << cali_Lv))) / (1366 * (freq_sys / 1000) / CAB_LSIFQ)) + 1) / 2) << 5 : ((((cnt_offset * (3200 / (1 << cali_Lv))) / (1366 * (freq_sys / 1000) / CAB_LSIFQ)) - 1) / 2) << 5;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
-    R16_INT32K_TUNE += cnt_offset;
+    while( (R8_OSC_CAL_CTRL & RB_OSC_CNT_TOTAL) != cali_Lv )
+    {
+        sys_safe_access_enable();
+        R8_OSC_CAL_CTRL |= cali_Lv;
+    }
+
+    sys_safe_access_enable();
     R8_OSC_CAL_CTRL &= ~RB_OSC_CNT_EN;
+    R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
+    R16_OSC_CAL_CNT |= RB_OSC_CAL_IF;
+    while( (R8_OSC_CAL_CTRL & RB_OSC_CNT_EN) == 0 )
+    {
+        sys_safe_access_enable();
+        R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+    }
+
+    while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT)); // 用于丢弃
+
+    sys_safe_access_enable();
+    R8_OSC_CAL_CTRL &= ~RB_OSC_CNT_EN;
+    R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
+    R16_OSC_CAL_CNT |= RB_OSC_CAL_IF;
+    while( (R8_OSC_CAL_CTRL & RB_OSC_CNT_EN) == 0 )
+    {
+        sys_safe_access_enable();
+        R8_OSC_CAL_CTRL |= RB_OSC_CNT_EN;
+    }
+
+    while(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT);
+    cnt_32k = RTC_GetCycle32k();
+    while(RTC_GetCycle32k() == cnt_32k);
+    R16_OSC_CAL_CNT |= RB_OSC_CAL_OV_CLR;
+    while(!(R8_OSC_CAL_CTRL & RB_OSC_CNT_HALT));
+    sys_safe_access_enable();
+    R8_OSC_CAL_CTRL &= ~RB_OSC_CNT_EN;
+    i = R16_OSC_CAL_CNT; // 实时校准后采样值
+
+    cnt_offset = (i & 0x3FFF) + R8_OSC_CAL_OV_CNT * 0x3FFF -  4000 * (1 << cali_Lv) * (freq_sys / 1000000) / 256 * 1000/(CAB_LSIFQ/256);
+    cnt_offset = (cnt_offset > 0) ? ((((cnt_offset * 2*(100 )) / (1366 * ((1 << cali_Lv)/8) * (freq_sys/1000) / 60000)) + 1) / 2)<<5 : ((((cnt_offset * 2*(100)) / (1366 * ((1 << cali_Lv)/8) * (freq_sys/1000) / 60000)) - 1) / 2)<<5;
+    sys_safe_access_enable();
+    R16_INT32K_TUNE += cnt_offset;
 }
 
 /*********************************************************************
@@ -268,18 +304,14 @@ void RTC_InitTime(uint16_t y, uint16_t mon, uint16_t d, uint16_t h, uint16_t m, 
         }
     }
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R32_RTC_TRIG = day;
     R8_RTC_MODE_CTRL |= RB_RTC_LOAD_HI;
     while((R32_RTC_TRIG & 0x3FFF) != (R32_RTC_CNT_DAY & 0x3FFF));
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R32_RTC_TRIG = t;
     R8_RTC_MODE_CTRL |= RB_RTC_LOAD_LO;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -345,12 +377,10 @@ void RTC_SetCycle32k(uint32_t cyc)
         clk_pin = (R8_CK32K_CONFIG & RB_32K_CLK_PIN);
     } while((clk_pin != (R8_CK32K_CONFIG & RB_32K_CLK_PIN)) || (!clk_pin));
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R32_RTC_TRIG = cyc;
     R8_RTC_MODE_CTRL |= RB_RTC_LOAD_LO;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -385,12 +415,11 @@ uint32_t RTC_GetCycle32k(void)
  */
 void RTC_TMRFunCfg(RTC_TMRCycTypeDef t)
 {
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_RTC_MODE_CTRL &= ~(RB_RTC_TMR_EN | RB_RTC_TMR_MODE);
+    sys_safe_access_enable();
     R8_RTC_MODE_CTRL |= RB_RTC_TMR_EN | (t);
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -412,12 +441,10 @@ void RTC_TRIGFunCfg(uint32_t cyc)
         t -= 0xA8C00000;
     }
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R32_RTC_TRIG = t;
     R8_RTC_MODE_CTRL |= RB_RTC_TRIG_EN;
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************
@@ -442,11 +469,9 @@ void RTC_ModeFunDisable(RTC_MODETypeDef m)
         i |= RB_RTC_TMR_EN;
     }
 
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
-    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
-    SAFEOPERATE;
+    sys_safe_access_enable();
     R8_RTC_MODE_CTRL &= ~(i);
-    R8_SAFE_ACCESS_SIG = 0;
+    sys_safe_access_disable();
 }
 
 /*********************************************************************

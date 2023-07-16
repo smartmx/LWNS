@@ -4,8 +4,10 @@
  * Version            : V1.2
  * Date               : 2021/11/17
  * Description
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 #ifndef __CH57x_SYS_H__
@@ -164,6 +166,23 @@ void mDelayuS(uint16_t t);
  * @param   t       - 时间参数
  */
 void mDelaymS(uint16_t t);
+
+/**
+ * @brief 进入安全访问模式.
+ * 
+ * @NOTE: 进入安全访问模式后约16个系统主频周期都处于安全模式下，
+ * 该有效期内可以改写一个或多个安全类寄存器，超出上述有效期后将自动终止安全模式。
+ */
+ __attribute__((always_inline)) static inline void sys_safe_access_enable(void)
+{
+    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG1;
+    R8_SAFE_ACCESS_SIG = SAFE_ACCESS_SIG2;
+}
+
+__attribute__((always_inline)) static inline void sys_safe_access_disable(void)
+{
+    R8_SAFE_ACCESS_SIG = 0;
+}
 
 #ifdef __cplusplus
 }

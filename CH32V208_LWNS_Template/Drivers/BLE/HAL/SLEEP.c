@@ -3,13 +3,15 @@
  * Author             : WCH
  * Version            : V1.2
  * Date               : 2022/01/18
- * Description        : 睡眠配置及其初始化
+ * Description        : Sleep configuration and its initialization
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 /******************************************************************************/
-/* 头文件包含 */
+/* Header file contains */
 #include "HAL.h"
 
 #define US_TO_TICK(us)                  (uint32_t)((us)/(1000000/((CAB_LSIFQ/2))))
@@ -50,13 +52,13 @@ uint32_t BLE_LowPower(uint32_t time)
     RTC_SetTignTime(wake_time);
     __enable_irq();
 
-  #if(DEBUG == DEBUG_UART1) // 使用其他串口输出打印信息需要修改这行代码
+  #if(DEBUG == DEBUG_UART1) // To use other serial ports to output printing information, you need to modify this line of code
     while(USART_GetFlagStatus(USART1, USART_FLAG_TC) == RESET)
     {
         __NOP();
     }
   #endif
-    // LOW POWER-sleep模式
+    // LOW POWER-sleep
     if(!RTCTigFlag) {
         PWR_EnterSTOPMode_RAM_LV(PWR_Regulator_LowPower, PWR_STOPEntry_WFI);
         SystemInit();
@@ -71,7 +73,7 @@ uint32_t BLE_LowPower(uint32_t time)
 /*******************************************************************************
  * @fn      HAL_SleepInit
  *
- * @brief   配置睡眠唤醒的方式   - RTC唤醒，触发模式
+ * @brief   Configure sleep Wake-up source   - RTC wake up, trigger mode
  *
  * @param   None.
  *

@@ -4,8 +4,10 @@
  * Version            : V1.2
  * Date               : 2021/11/17
  * Description
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 #include "CH57x_common.h"
@@ -682,7 +684,7 @@ uint8_t SETorOFFNumLock(uint8_t *buf)
 {
     uint8_t tmp[] = {0x21, 0x09, 0x00, 0x02, 0x00, 0x00, 0x01, 0x00};
     uint8_t len, s;
-    if((buf[2] == 0x53) & (buf[0] | buf[1] | buf[3] | buf[4] | buf[5] | buf[6] | buf[7] == 0))
+    if((buf[2] == 0x53) & ((buf[0] | buf[1] | buf[3] | buf[4] | buf[5] | buf[6] | buf[7]) == 0))
     {
         for(s = 0; s != sizeof(tmp); s++)
         {
@@ -711,7 +713,7 @@ uint8_t CtrlGetHIDDeviceReport(uint8_t infc)
     uint8_t s;
     uint8_t len;
 
-    CopySetupReqPkg((int8_t *)SetupSetHIDIdle);
+    CopySetupReqPkg(SetupSetHIDIdle);
     pSetupReq->wIndex = infc;
     s = HostCtrlTransfer(Com_Buffer, &len); // 执行控制传输
     if(s != ERR_SUCCESS)
@@ -719,7 +721,7 @@ uint8_t CtrlGetHIDDeviceReport(uint8_t infc)
         return (s);
     }
 
-    CopySetupReqPkg((int8_t *)SetupGetHIDDevReport);
+    CopySetupReqPkg(SetupGetHIDDevReport);
     pSetupReq->wIndex = infc;
     s = HostCtrlTransfer(Com_Buffer, &len); // 执行控制传输
     if(s != ERR_SUCCESS)
@@ -744,7 +746,7 @@ uint8_t CtrlGetHubDescr(void)
     uint8_t s;
     uint8_t len;
 
-    CopySetupReqPkg((int8_t *)SetupGetHubDescr);
+    CopySetupReqPkg(SetupGetHubDescr);
     s = HostCtrlTransfer(Com_Buffer, &len); // 执行控制传输
     if(s != ERR_SUCCESS)
     {

@@ -4,8 +4,10 @@
  * Version            : V1.0
  * Date               : 2016/04/12
  * Description        :
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 /******************************************************************************/
@@ -44,7 +46,7 @@ extern "C" {
  * TYPEDEFS
  */
 
-/* 连接一个LED用于监控演示程序的进度,低电平LED亮 */
+/* Connect an LED to monitor the progress of the demo program, the low-level LED is on */
 
 /* 1 - LED */
 #define LED1_PCENR              (RCC_APB2Periph_GPIOB)

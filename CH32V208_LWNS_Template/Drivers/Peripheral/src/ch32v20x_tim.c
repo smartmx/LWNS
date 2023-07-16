@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2021/06/06
  * Description        : This file provides all the TIM firmware functions.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v20x_tim.h"
 #include "ch32v20x_rcc.h"
 
@@ -87,6 +89,9 @@ void TIM_TimeBaseInit(TIM_TypeDef *TIMx, TIM_TimeBaseInitTypeDef *TIM_TimeBaseIn
         tmpcr1 &= (uint16_t)(~((uint16_t)(TIM_DIR | TIM_CMS)));
         tmpcr1 |= (uint32_t)TIM_TimeBaseInitStruct->TIM_CounterMode;
     }
+
+    tmpcr1 &= (uint16_t)(~((uint16_t)TIM_CTLR1_CKD));
+    tmpcr1 |= (uint32_t)TIM_TimeBaseInitStruct->TIM_ClockDivision;
 
     TIMx->CTLR1 = tmpcr1;
     TIMx->ATRLR = TIM_TimeBaseInitStruct->TIM_Period;

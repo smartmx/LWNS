@@ -4,9 +4,11 @@
  * Version            : V1.0.0
  * Date               : 2021/06/06
  * Description        : This file provides all the GPIO firmware functions.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #include "ch32v20x_gpio.h"
 #include "ch32v20x_rcc.h"
 
@@ -17,6 +19,10 @@
 #define DBGAFR_SWJCFG_MASK        ((uint32_t)0xF0FFFFFF)
 #define DBGAFR_LOCATION_MASK      ((uint32_t)0x00200000)
 #define DBGAFR_NUMBITS_MASK       ((uint32_t)0x00100000)
+
+#if defined (CH32V20x_D6)
+uint8_t MCU_Version = 0;
+#endif
 
 /*********************************************************************
  * @fn      GPIO_DeInit
@@ -93,7 +99,12 @@ void GPIO_Init(GPIO_TypeDef *GPIOx, GPIO_InitTypeDef *GPIO_InitStruct)
         currentmode |= (uint32_t)GPIO_InitStruct->GPIO_Speed;
     }
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if(((*(uint32_t *) 0x40022030) & 0x0F000000) == 0)
+    {
+        MCU_Version = 1;
+    }
+
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_InitStruct->GPIO_Pin = GPIO_InitStruct->GPIO_Pin >> 13;
     }
 
@@ -193,7 +204,7 @@ uint8_t GPIO_ReadInputDataBit(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
     uint8_t bitstatus = 0x00;
 
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_Pin = GPIO_Pin >> 13;
     }
 
@@ -225,7 +236,7 @@ uint16_t GPIO_ReadInputData(GPIO_TypeDef *GPIOx)
     uint16_t val;
 
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         val = ( uint16_t )(GPIOx->INDR << 13);
     }
     else{
@@ -255,7 +266,7 @@ uint8_t GPIO_ReadOutputDataBit(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
     uint8_t bitstatus = 0x00;
 
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_Pin = GPIO_Pin >> 13;
     }
 
@@ -287,7 +298,7 @@ uint16_t GPIO_ReadOutputData(GPIO_TypeDef *GPIOx)
     uint16_t val;
 
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         val = ( uint16_t )(GPIOx->OUTDR << 13);
     }
     else{
@@ -315,7 +326,7 @@ uint16_t GPIO_ReadOutputData(GPIO_TypeDef *GPIOx)
 void GPIO_SetBits(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 {
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_Pin = GPIO_Pin >> 13;
     }
 
@@ -338,7 +349,7 @@ void GPIO_SetBits(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 void GPIO_ResetBits(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 {
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_Pin = GPIO_Pin >> 13;
     }
 
@@ -363,7 +374,7 @@ void GPIO_ResetBits(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
 void GPIO_WriteBit(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, BitAction BitVal)
 {
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_Pin = GPIO_Pin >> 13;
     }
 
@@ -392,7 +403,7 @@ void GPIO_WriteBit(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin, BitAction BitVal)
 void GPIO_Write(GPIO_TypeDef *GPIOx, uint16_t PortVal)
 {
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         PortVal = PortVal >> 13;
     }
 
@@ -417,7 +428,7 @@ void GPIO_PinLockConfig(GPIO_TypeDef *GPIOx, uint16_t GPIO_Pin)
     uint32_t tmp = 0x00010000;
 
 #if defined (CH32V20x_D6)
-    if(GPIOx == GPIOC){
+    if((GPIOx == GPIOC) && MCU_Version){
         GPIO_Pin = GPIO_Pin >> 13;
     }
 
@@ -546,7 +557,9 @@ void GPIO_PinRemapConfig(uint32_t GPIO_Remap, FunctionalState NewState)
         tmpreg = AFIO->PCFR1;
 
 #if defined (CH32V20x_D6) || defined (CH32V20x_D8)
+    if(((*(uint32_t *) 0x40022030) & 0x0F000000) == 0){
         tmpreg = ((tmpreg>>1)&0xFFFFE000)|(tmpreg&0x00001FFF);
+    }
 
 #endif
     }
@@ -623,13 +636,6 @@ void GPIO_PinRemapConfig(uint32_t GPIO_Remap, FunctionalState NewState)
 void GPIO_EXTILineConfig(uint8_t GPIO_PortSource, uint8_t GPIO_PinSource)
 {
     uint32_t tmp = 0x00;
-
-#if defined (CH32V20x_D6)
-        if(GPIO_PortSource == GPIO_PortSourceGPIOC){
-            GPIO_PinSource -= 13;
-        }
-
-#endif
 
     tmp = ((uint32_t)0x0F) << (0x04 * (GPIO_PinSource & (uint8_t)0x03));
     AFIO->EXTICR[GPIO_PinSource >> 0x02] &= ~tmp;

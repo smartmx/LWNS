@@ -4,8 +4,10 @@
  * Version            : V1.0
  * Date               : 2018/11/12
  * Description        :
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 /******************************************************************************/
@@ -25,14 +27,14 @@ extern "C" {
  */
 
 /**
- * @brief   配置睡眠唤醒的方式   - RTC唤醒，触发模式
+ * @brief   Configure sleep Wake-up source   - RTC wake up, trigger mode
  */
 extern void HAL_SleepInit(void);
 
 /**
- * @brief   启动睡眠
+ * @brief   Start sleep
  *
- * @param   time    - 唤醒的时间点（RTC绝对值）
+ * @param   time    - Wake-up time (RTC absolute value)
  *
  * @return  state.
  */

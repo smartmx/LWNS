@@ -4,12 +4,14 @@
  * Version            : V1.2
  * Date               : 2022/01/18
  * Description        :
+ *********************************************************************************
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
+ * Attention: This software (modified or not) and binary are used for 
+ * microcontroller manufactured by Nanjing Qinheng Microelectronics.
  *******************************************************************************/
 
 /******************************************************************************/
-/* 头文件包含 */
+/* Header file contains */
 #include "HAL.h"
 
 /* LED control structure */

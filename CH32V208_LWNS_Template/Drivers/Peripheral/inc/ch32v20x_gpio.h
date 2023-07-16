@@ -5,9 +5,11 @@
  * Date               : 2021/06/06
  * Description        : This file contains all the functions prototypes for the
  *                      GPIO firmware library.
- * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
- * SPDX-License-Identifier: Apache-2.0
- *******************************************************************************/
+*********************************************************************************
+* Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
+* Attention: This software (modified or not) and binary are used for 
+* microcontroller manufactured by Nanjing Qinheng Microelectronics.
+*******************************************************************************/
 #ifndef __CH32V20x_GPIO_H
 #define __CH32V20x_GPIO_H
 
@@ -104,8 +106,6 @@ typedef enum
 #define GPIO_Remap_ETH                  ((uint32_t)0x00200020) /* Ethernet remapping (only for Connectivity line devices) */
 #define GPIO_Remap_CAN2                 ((uint32_t)0x00200040) /* CAN2 remapping (only for Connectivity line devices) */
 #define GPIO_Remap_MII_RMII_SEL         ((uint32_t)0x00200080) /* MII or RMII selection */
-#define GPIO_Remap_SWJ_NoJTRST          ((uint32_t)0x00300100) /* Full SWJ Enabled (JTAG-DP + SW-DP) but without JTRST */
-#define GPIO_Remap_SWJ_JTAGDisable      ((uint32_t)0x00300200) /* JTAG-DP Disabled and SW-DP Enabled */
 #define GPIO_Remap_SWJ_Disable          ((uint32_t)0x00300400) /* Full SWJ Disabled (JTAG-DP + SW-DP) */
 #define GPIO_Remap_SPI3                 ((uint32_t)0x00201000) /* SPI3/I2S3 Alternate Function mapping (only for Connectivity line devices) */
 #define GPIO_Remap_TIM2ITR1_PTP_SOF     ((uint32_t)0x00202000) /* Ethernet PTP output or USB OTG SOF (Start of Frame) connected \
