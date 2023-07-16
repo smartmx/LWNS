@@ -1,14 +1,14 @@
 /*
  * lwns_unicast_example.c
-   *   Ê¹ÓÃĞèÒªÈ¥app_main.cÖĞÈ¡Ïû±¾Àı×Ó³õÊ¼»¯º¯ÊıµÄ×¢ÊÍ
-   *   µ¥²¥´«ÊäÀı×Ó
+   *   ä½¿ç”¨éœ€è¦å»app_main.cä¸­å–æ¶ˆæœ¬ä¾‹å­åˆå§‹åŒ–å‡½æ•°çš„æ³¨é‡Š
+   *   å•æ’­ä¼ è¾“ä¾‹å­
  * single-hop unicast
  * Created on: Jul 19, 2021
  * Author: WCH
  */
 #include "lwns_unicast_example.h"
 
-//Ã¿¸öÎÄ¼şµ¥¶Àdebug´òÓ¡µÄ¿ª¹Ø£¬ÖÃ0¿ÉÒÔ½ûÖ¹±¾ÎÄ¼şÄÚ²¿´òÓ¡
+//æ¯ä¸ªæ–‡ä»¶å•ç‹¬debugæ‰“å°çš„å¼€å…³ï¼Œç½®0å¯ä»¥ç¦æ­¢æœ¬æ–‡ä»¶å†…éƒ¨æ‰“å°
 #define DEBUG_PRINT_IN_THIS_FILE 1
 #if DEBUG_PRINT_IN_THIS_FILE
 #define PRINTF(...) PRINT(__VA_ARGS__)
@@ -17,7 +17,7 @@
 #endif
 
 #if 1
-static lwns_addr_t dst_addr = { { 0xab, 0xdf, 0x38, 0xe4, 0xc2, 0x84 } };//Ä¿±ê½ÚµãµØÖ·£¬²âÊÔÊ±£¬Çë¸ù¾İµçÂ·°åĞ¾Æ¬MACµØÖ·²»Í¬½øĞĞĞŞ¸Ä¡£ĞŞ¸ÄÎª½ÓÊÕ·½µÄMACµØÖ·£¬ÇëÎğÊ¹ÓÃ×Ô¼ºµÄMACµØÖ·
+static lwns_addr_t dst_addr = { { 0xab, 0xdf, 0x38, 0xe4, 0xc2, 0x84 } };//ç›®æ ‡èŠ‚ç‚¹åœ°å€ï¼Œæµ‹è¯•æ—¶ï¼Œè¯·æ ¹æ®ç”µè·¯æ¿èŠ¯ç‰‡MACåœ°å€ä¸åŒè¿›è¡Œä¿®æ”¹ã€‚ä¿®æ”¹ä¸ºæ¥æ”¶æ–¹çš„MACåœ°å€ï¼Œè¯·å‹¿ä½¿ç”¨è‡ªå·±çš„MACåœ°å€
 #else
 static lwns_addr_t dst_addr = { { 0xd9, 0x37, 0x3c, 0xe4, 0xc2, 0x84 } };
 #endif
@@ -26,32 +26,32 @@ static uint8_t TX_DATA[10] =
         { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 };
 static uint8_t RX_DATA[10];
 static uint16_t lwns_unicast_ProcessEvent(uint8_t task_id, uint16_t events);
-static void unicast_recv(lwns_controller_ptr c, const lwns_addr_t *from);//µ¥²¥½ÓÊÕ»Øµ÷º¯Êı
-static void unicast_sent(lwns_controller_ptr ptr);//µ¥²¥·¢ËÍÍê³É»Øµ÷º¯Êı
+static void unicast_recv(lwns_controller_ptr c, const lwns_addr_t *from);//å•æ’­æ¥æ”¶å›è°ƒå‡½æ•°
+static void unicast_sent(lwns_controller_ptr ptr);//å•æ’­å‘é€å®Œæˆå›è°ƒå‡½æ•°
 
-static lwns_unicast_controller unicast;//ÉùÃ÷µ¥²¥¿ØÖÆ½á¹¹Ìå
+static lwns_unicast_controller unicast;//å£°æ˜å•æ’­æ§åˆ¶ç»“æ„ä½“
 
-static uint8_t unicast_taskID;//ÉùÃ÷µ¥²¥¿ØÖÆÈÎÎñid
+static uint8_t unicast_taskID;//å£°æ˜å•æ’­æ§åˆ¶ä»»åŠ¡id
 
 /*********************************************************************
  * @fn      unicast_recv
  *
- * @brief   lwns unicast½ÓÊÕ»Øµ÷º¯Êı
+ * @brief   lwns unicastæ¥æ”¶å›è°ƒå‡½æ•°
  *
- * @param   ptr     -   ±¾´Î½ÓÊÕµ½µÄÊı¾İËùÊôµÄµ¥²¥¿ØÖÆ½á¹¹ÌåÖ¸Õë.
- * @param   sender  -   ±¾´Î½ÓÊÕµ½µÄÊı¾İµÄ·¢ËÍÕßµØÖ·Ö¸Õë.
+ * @param   ptr     -   æœ¬æ¬¡æ¥æ”¶åˆ°çš„æ•°æ®æ‰€å±çš„å•æ’­æ§åˆ¶ç»“æ„ä½“æŒ‡é’ˆ.
+ * @param   sender  -   æœ¬æ¬¡æ¥æ”¶åˆ°çš„æ•°æ®çš„å‘é€è€…åœ°å€æŒ‡é’ˆ.
  *
  * @return  None.
  */
 static void unicast_recv(lwns_controller_ptr ptr, const lwns_addr_t *sender){
     uint8_t len;
-    len = lwns_buffer_datalen(); //»ñÈ¡µ±Ç°»º³åÇø½ÓÊÕµ½µÄÊı¾İ³¤¶È
+    len = lwns_buffer_datalen(); //è·å–å½“å‰ç¼“å†²åŒºæ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
     if (len == 10) {
-        lwns_buffer_save_data(RX_DATA); //½ÓÊÕÊı¾İµ½ÓÃ»§Êı¾İÇøÓò
+        lwns_buffer_save_data(RX_DATA); //æ¥æ”¶æ•°æ®åˆ°ç”¨æˆ·æ•°æ®åŒºåŸŸ
         PRINTF("unicast %d rec from %02x %02x %02x %02x %02x %02x\n",
                 get_lwns_object_port(ptr),
                 sender->v8[0], sender->v8[1], sender->v8[2], sender->v8[3],
-                sender->v8[4], sender->v8[5]);//senderÎª½ÓÊÕµ½µÄÊı¾İµÄ·¢ËÍ·½µØÖ·
+                sender->v8[4], sender->v8[5]);//senderä¸ºæ¥æ”¶åˆ°çš„æ•°æ®çš„å‘é€æ–¹åœ°å€
         PRINTF("data:");
         for (uint8_t i = 0; i < len; i++) {
             PRINTF("%02x ", RX_DATA[i]);
@@ -65,9 +65,9 @@ static void unicast_recv(lwns_controller_ptr ptr, const lwns_addr_t *sender){
 /*********************************************************************
  * @fn      unicast_sent
  *
- * @brief   lwns unicast·¢ËÍÍê³É»Øµ÷º¯Êı
+ * @brief   lwns unicastå‘é€å®Œæˆå›è°ƒå‡½æ•°
  *
- * @param   ptr     -   ±¾´Î·¢ËÍÍê³ÉµÄ¿É¿¿µ¥²¥¿ØÖÆ½á¹¹ÌåÖ¸Õë.
+ * @param   ptr     -   æœ¬æ¬¡å‘é€å®Œæˆçš„å¯é å•æ’­æ§åˆ¶ç»“æ„ä½“æŒ‡é’ˆ.
  *
  * @return  None.
  */
@@ -76,7 +76,7 @@ static void unicast_sent(lwns_controller_ptr ptr) {
 }
 
 /**
- * lwns µ¥²¥»Øµ÷º¯Êı½á¹¹Ìå£¬×¢²á»Øµ÷º¯Êı
+ * lwns å•æ’­å›è°ƒå‡½æ•°ç»“æ„ä½“ï¼Œæ³¨å†Œå›è°ƒå‡½æ•°
  */
 static const struct lwns_unicast_callbacks unicast_callbacks =
 {unicast_recv,unicast_sent};
@@ -84,7 +84,7 @@ static const struct lwns_unicast_callbacks unicast_callbacks =
 /*********************************************************************
  * @fn      lwns_unicast_process_init
  *
- * @brief   lwns unicastÀı³Ì³õÊ¼»¯.
+ * @brief   lwns unicastä¾‹ç¨‹åˆå§‹åŒ–.
  *
  * @param   None.
  *
@@ -93,9 +93,9 @@ static const struct lwns_unicast_callbacks unicast_callbacks =
 void lwns_unicast_process_init(void) {
     unicast_taskID = TMOS_ProcessEventRegister(lwns_unicast_ProcessEvent);
     lwns_unicast_init(&unicast,
-            136,//´ò¿ªÒ»¸ö¶Ë¿ÚºÅÎª136µÄµ¥²¥
+            136,//æ‰“å¼€ä¸€ä¸ªç«¯å£å·ä¸º136çš„å•æ’­
             &unicast_callbacks
-            );//·µ»Ø0´ú±í´ò¿ªÊ§°Ü¡£·µ»Ø1´ò¿ª³É¹¦¡£
+            );//è¿”å›0ä»£è¡¨æ‰“å¼€å¤±è´¥ã€‚è¿”å›1æ‰“å¼€æˆåŠŸã€‚
     tmos_start_task(unicast_taskID, UNICAST_EXAMPLE_TX_PERIOD_EVT,
             MS1_TO_SYSTEM_TIME(1000));
 }
@@ -118,13 +118,13 @@ uint16_t lwns_unicast_ProcessEvent(uint8_t task_id, uint16_t events) {
         uint8_t temp;
         temp = TX_DATA[0];
         for (uint8_t i = 0; i < 9; i++) {
-            TX_DATA[i] = TX_DATA[i + 1];//ÒÆÎ»·¢ËÍÊı¾İ£¬ÒÔ±ã¹Û²ìĞ§¹û
+            TX_DATA[i] = TX_DATA[i + 1];//ç§»ä½å‘é€æ•°æ®ï¼Œä»¥ä¾¿è§‚å¯Ÿæ•ˆæœ
         }
         TX_DATA[9] = temp;
-        lwns_buffer_load_data(TX_DATA, sizeof(TX_DATA));//ÔØÈëĞèÒª·¢ËÍµÄÊı¾İµ½»º³åÇø
-        lwns_unicast_send(&unicast,&dst_addr);//µ¥²¥·¢ËÍÊı¾İ¸øÖ¸¶¨½Úµã
+        lwns_buffer_load_data(TX_DATA, sizeof(TX_DATA));//è½½å…¥éœ€è¦å‘é€çš„æ•°æ®åˆ°ç¼“å†²åŒº
+        lwns_unicast_send(&unicast,&dst_addr);//å•æ’­å‘é€æ•°æ®ç»™æŒ‡å®šèŠ‚ç‚¹
         tmos_start_task(unicast_taskID, UNICAST_EXAMPLE_TX_PERIOD_EVT,
-                MS1_TO_SYSTEM_TIME(1000));//ÖÜÆÚĞÔ·¢ËÍ
+                MS1_TO_SYSTEM_TIME(1000));//å‘¨æœŸæ€§å‘é€
         return events ^ UNICAST_EXAMPLE_TX_PERIOD_EVT;
     }
     if (events & SYS_EVENT_MSG) {

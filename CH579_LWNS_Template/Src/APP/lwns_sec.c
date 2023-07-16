@@ -1,32 +1,32 @@
 /*
  * lwns_sec.c
- * lwnsÏûÏ¢¼ÓÃÜ
+ * lwnsæ¶ˆæ¯åŠ å¯†
  * Created on: Sep 17, 2021
  * Author: WCH
  */
 
 #include "lwns_sec.h"
 
-static uint8_t lwns_sec_key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};//ÓÃ»§×ÔĞĞ¸ü¸ÄÎª×Ô¼ºµÄÃØÔ¿£¬»òÕß¸ÄÎª¿ÉÒÔ´ÓÖ÷»ú»ñÈ¡£¬²¢´æ´¢ÔÚeepromÖĞ
+static uint8_t lwns_sec_key[16]={1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};//ç”¨æˆ·è‡ªè¡Œæ›´æ”¹ä¸ºè‡ªå·±çš„ç§˜é’¥ï¼Œæˆ–è€…æ”¹ä¸ºå¯ä»¥ä»ä¸»æœºè·å–ï¼Œå¹¶å­˜å‚¨åœ¨eepromä¸­
 
 
 /*********************************************************************
  * @fn      lwns_msg_encrypt
  *
- * @brief   lwnsÏûÏ¢¼ÓÃÜ
+ * @brief   lwnsæ¶ˆæ¯åŠ å¯†
  *
- * @param   src     -   ´ı¼ÓÃÜµÄÊı¾İ»º³åÍ·Ö¸Õë.
- * @param   to      -   ´ı´æ´¢¼ÓÃÜÊı¾İµÄÊı¾İ»º´æÇøÍ·Ö¸Õë.
- * @param   mlen    -   ´ı¼ÓÃÜµÄÊı¾İ³¤¶È.
+ * @param   src     -   å¾…åŠ å¯†çš„æ•°æ®ç¼“å†²å¤´æŒ‡é’ˆ.
+ * @param   to      -   å¾…å­˜å‚¨åŠ å¯†æ•°æ®çš„æ•°æ®ç¼“å­˜åŒºå¤´æŒ‡é’ˆ.
+ * @param   mlen    -   å¾…åŠ å¯†çš„æ•°æ®é•¿åº¦.
  *
- * @return  ¼ÓÃÜºóµÄÊı¾İ³¤¶È.
+ * @return  åŠ å¯†åçš„æ•°æ®é•¿åº¦.
  */
 int lwns_msg_encrypt(uint8_t *src,uint8_t *to,uint8_t mlen){
     uint16_t i = 0;
     uint8_t esrc[16];
     while(1){
         if((mlen - i) < 16){
-            tmos_memcpy(esrc, src + i, (mlen - i));//À©³äµ½16×Ö½Ú£¬ÆäËûÎª0
+            tmos_memcpy(esrc, src + i, (mlen - i));//æ‰©å……åˆ°16å­—èŠ‚ï¼Œå…¶ä»–ä¸º0
             LL_Encrypt(lwns_sec_key, esrc , to + i);
         } else {
             LL_Encrypt(lwns_sec_key, src + i , to + i);
@@ -36,19 +36,19 @@ int lwns_msg_encrypt(uint8_t *src,uint8_t *to,uint8_t mlen){
             break;
         }
     }
-    return i;//·µ»Ø¼ÓÃÜºóÊı¾İ³¤¶È
+    return i;//è¿”å›åŠ å¯†åæ•°æ®é•¿åº¦
 }
 
 /*********************************************************************
  * @fn      lwns_msg_decrypt
  *
- * @brief   lwnsÏûÏ¢½âÃÜ
+ * @brief   lwnsæ¶ˆæ¯è§£å¯†
  *
- * @param   src     -   ´ı½âÃÜµÄÊı¾İ»º³åÍ·Ö¸Õë.
- * @param   to      -   ´ı´æ´¢½âÃÜÊı¾İµÄÊı¾İ»º´æÇøÍ·Ö¸Õë.
- * @param   mlen    -   ´ı½âÃÜµÄÊı¾İ³¤¶È£¬±ØĞëÎª16µÄ±¶Êı.
+ * @param   src     -   å¾…è§£å¯†çš„æ•°æ®ç¼“å†²å¤´æŒ‡é’ˆ.
+ * @param   to      -   å¾…å­˜å‚¨è§£å¯†æ•°æ®çš„æ•°æ®ç¼“å­˜åŒºå¤´æŒ‡é’ˆ.
+ * @param   mlen    -   å¾…è§£å¯†çš„æ•°æ®é•¿åº¦ï¼Œå¿…é¡»ä¸º16çš„å€æ•°.
  *
- * @return  ½âÃÜºóµÄÊı¾İ³¤¶È.
+ * @return  è§£å¯†åçš„æ•°æ®é•¿åº¦.
  */
 int lwns_msg_decrypt(uint8_t *src,uint8_t *to,uint8_t mlen){
     unsigned short i = 0;

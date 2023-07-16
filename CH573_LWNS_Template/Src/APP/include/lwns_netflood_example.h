@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/07/12
- * Description        : netflood£¬ÍøÂç·ººé´«ÊäÀı×Ó
+ * Description        : netfloodï¼Œç½‘ç»œæ³›æ´ªä¼ è¾“ä¾‹å­
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/

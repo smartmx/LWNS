@@ -9,7 +9,7 @@
  *******************************************************************************/
 
 /******************************************************************************/
-/* Í·ÎÄ¼ş°üº¬ */
+/* å¤´æ–‡ä»¶åŒ…å« */
 #include "CONFIG.h"
 #include "CH57x_common.h"
 #include "HAL.h"
@@ -27,15 +27,12 @@
 #include "lwns_multinetflood_example.h"
 #include "lwns_mesh_example.h"
 
-//Ã¿¸öÎÄ¼şµ¥¶Àdebug´òÓ¡µÄ¿ª¹Ø£¬ÖÃ0¿ÉÒÔ½ûÖ¹±¾ÎÄ¼şÄÚ²¿´òÓ¡
+//æ¯ä¸ªæ–‡ä»¶å•ç‹¬debugæ‰“å°çš„å¼€å…³ï¼Œç½®0å¯ä»¥ç¦æ­¢æœ¬æ–‡ä»¶å†…éƒ¨æ‰“å°
 #define DEBUG_PRINT_IN_THIS_FILE    1
 #if DEBUG_PRINT_IN_THIS_FILE
-  #define PRINTF(...)    PRINT(__VA_ARGS__)
+#define PRINTF(...)     PRINT(__VA_ARGS__)
 #else
-  #define PRINTF(...) \
-    do                \
-    {                 \
-    } while(0)
+#define PRINTF(...)     do {} while(0)
 #endif
 
 /*********************************************************************
@@ -50,12 +47,13 @@ u8C MacAddr[6] = {0x84, 0xC2, 0xE4, 0x03, 0x02, 0x02};
 /*********************************************************************
  * @fn      Main_Circulation
  *
- * @brief   tmosÖ÷Ñ­»·.
+ * @brief   tmosä¸»å¾ªç¯.
  *
  * @param   None.
  *
  * @return  None.
  */
+__attribute__((noinline))
 __attribute__((section(".highcode")))
 void Main_Circulation()
 {
@@ -68,7 +66,7 @@ void Main_Circulation()
 /*********************************************************************
  * @fn      main
  *
- * @brief   Ö÷º¯Êı.
+ * @brief   ä¸»å‡½æ•°.
  *
  * @param   None.
  *
@@ -97,16 +95,16 @@ int main(void)
     HAL_Init();
     RF_RoleInit();
     RF_Init();
-    lwns_init(); //³õÊ¼lwnsĞ­ÒéÕ»
-    //lwns_broadcast_process_init();//¹ã²¥Àı×Ó³õÊ¼»¯
-    //lwns_multicast_process_init();//×é²¥Àı×Ó³õÊ¼»¯
-    //lwns_unicast_process_init();//µ¥²¥Àı×Ó³õÊ¼»¯
-    //lwns_ruc_process_init();//¿É¿¿µ¥²¥Àı×Ó³õÊ¼»¯
-    //lwns_rucft_process_init();//¿É¿¿µ¥²¥ÎÄ¼ş´«ÊäÀı×Ó³õÊ¼»¯
-    lwns_netflood_process_init(); //ÍøÂç·ººéÀı×Ó³õÊ¼»¯
-    //lwns_uninetflood_process_init();//µ¥²¥ÍøÂç·ººéÀı×Ó³õÊ¼»¯
-    //lwns_multinetflood_process_init();//×é²¥ÍøÂç·ººéÀı×Ó³õÊ¼»¯
-    //lwns_mesh_process_init();//mesh×éÍøÀı×Ó³õÊ¼»¯
+    lwns_init(); //åˆå§‹lwnsåè®®æ ˆ
+    //lwns_broadcast_process_init();//å¹¿æ’­ä¾‹å­åˆå§‹åŒ–
+    //lwns_multicast_process_init();//ç»„æ’­ä¾‹å­åˆå§‹åŒ–
+    //lwns_unicast_process_init();//å•æ’­ä¾‹å­åˆå§‹åŒ–
+    //lwns_ruc_process_init();//å¯é å•æ’­ä¾‹å­åˆå§‹åŒ–
+    //lwns_rucft_process_init();//å¯é å•æ’­æ–‡ä»¶ä¼ è¾“ä¾‹å­åˆå§‹åŒ–
+    lwns_netflood_process_init(); //ç½‘ç»œæ³›æ´ªä¾‹å­åˆå§‹åŒ–
+    //lwns_uninetflood_process_init();//å•æ’­ç½‘ç»œæ³›æ´ªä¾‹å­åˆå§‹åŒ–
+    //lwns_multinetflood_process_init();//ç»„æ’­ç½‘ç»œæ³›æ´ªä¾‹å­åˆå§‹åŒ–
+    //lwns_mesh_process_init();//meshç»„ç½‘ä¾‹å­åˆå§‹åŒ–
     Main_Circulation();
 }
 /******************************** endfile @ main ******************************/

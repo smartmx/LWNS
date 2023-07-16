@@ -9,7 +9,7 @@
 
 
 /******************************************************************************/
-/* Í·ÎÄ¼ş°üº¬ */
+/* å¤´æ–‡ä»¶åŒ…å« */
 #include "CONFIG.h"
 #include "HAL.h"
 #include "stdlib.h"
@@ -26,7 +26,7 @@
 #include "lwns_multinetflood_example.h"
 #include "lwns_mesh_example.h"
 
-//Ã¿¸öÎÄ¼şµ¥¶Àdebug´òÓ¡µÄ¿ª¹Ø£¬ÖÃ0¿ÉÒÔ½ûÖ¹±¾ÎÄ¼şÄÚ²¿´òÓ¡
+//æ¯ä¸ªæ–‡ä»¶å•ç‹¬debugæ‰“å°çš„å¼€å…³ï¼Œç½®0å¯ä»¥ç¦æ­¢æœ¬æ–‡ä»¶å†…éƒ¨æ‰“å°
 #define DEBUG_PRINT_IN_THIS_FILE 1
 #if DEBUG_PRINT_IN_THIS_FILE
 #define PRINTF(...) PRINT(__VA_ARGS__)
@@ -46,7 +46,7 @@ uint8_t const MacAddr[6] = {0x84,0xC2,0xE4,0x03,0x02,0x02};
 /*********************************************************************
  * @fn      Main_Circulation
  *
- * @brief   tmosÖ÷Ñ­»·.
+ * @brief   tmosä¸»å¾ªç¯.
  *
  * @param   None.
  *
@@ -65,7 +65,7 @@ void Main_Circulation()
 /*********************************************************************
  * @fn      main
  *
- * @brief   Ö÷º¯Êı
+ * @brief   ä¸»å‡½æ•°
  *
  * @return  none
  */
@@ -80,16 +80,16 @@ int main(void)
   HAL_Init(  );
   RF_RoleInit( );
   RF_Init( );
-  lwns_init();//³õÊ¼lwnsĞ­ÒéÕ»
-  //lwns_broadcast_process_init();//¹ã²¥
-  //lwns_multicast_process_init();//×é²¥
-  //lwns_unicast_process_init();//µ¥²¥
-  //lwns_ruc_process_init();//¿É¿¿µ¥²¥
-  //lwns_rucft_process_init();//¿É¿¿µ¥²¥ÎÄ¼ş´«Êä
-  lwns_netflood_process_init();//ÍøÂç·ººé
-  //lwns_uninetflood_process_init();//µ¥²¥ÍøÂç·ººé
-  //lwns_multinetflood_process_init();//×é²¥ÍøÂç·ººé
-  //lwns_mesh_process_init();//mesh×éÍø
+  lwns_init();//åˆå§‹lwnsåè®®æ ˆ
+  //lwns_broadcast_process_init();//å¹¿æ’­
+  //lwns_multicast_process_init();//ç»„æ’­
+  //lwns_unicast_process_init();//å•æ’­
+  //lwns_ruc_process_init();//å¯é å•æ’­
+  //lwns_rucft_process_init();//å¯é å•æ’­æ–‡ä»¶ä¼ è¾“
+  lwns_netflood_process_init();//ç½‘ç»œæ³›æ´ª
+  //lwns_uninetflood_process_init();//å•æ’­ç½‘ç»œæ³›æ´ª
+  //lwns_multinetflood_process_init();//ç»„æ’­ç½‘ç»œæ³›æ´ª
+  //lwns_mesh_process_init();//meshç»„ç½‘
   Main_Circulation();
 }
 /******************************** endfile @ main ******************************/

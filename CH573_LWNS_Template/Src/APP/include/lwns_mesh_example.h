@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/06/28
- * Description        : mesh´«Êä³ÌĞòÀı×Ó
+ * Description        : meshä¼ è¾“ç¨‹åºä¾‹å­
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/

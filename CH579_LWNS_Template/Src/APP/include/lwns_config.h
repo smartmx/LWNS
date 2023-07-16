@@ -12,14 +12,14 @@
 #include "CH57x_common.h"
 #include "WCH_LWNS_LIB.h"
 
-#define LWNS_ADDR_USE_BLE_MAC           1       //ÊÇ·ñÊ¹ÓÃÀ¶ÑÀÓ²¼þµÄmacµØÖ·×÷ÎªÄ¬ÈÏlwnsµØÖ·
+#define LWNS_ADDR_USE_BLE_MAC           1       //æ˜¯å¦ä½¿ç”¨è“ç‰™ç¡¬ä»¶çš„macåœ°å€ä½œä¸ºé»˜è®¤lwnsåœ°å€
 
-#define LWNS_ENCRYPT_ENABLE             1       //ÊÇ·ñÊ¹ÄÜ¼ÓÃÜ
+#define LWNS_ENCRYPT_ENABLE             1       //æ˜¯å¦ä½¿èƒ½åŠ å¯†
 
-#define QBUF_MANUAL_NUM                 4       //qbuf»º´æÊýÁ¿ÅäÖÃ
+#define QBUF_MANUAL_NUM                 4       //qbufç¼“å­˜æ•°é‡é…ç½®
 
-#define ROUTE_ENTRY_MANUAL_NUM          32      //Â·ÓÉÌõÄ¿ÊýÁ¿ÅäÖÃ
+#define ROUTE_ENTRY_MANUAL_NUM          32      //è·¯ç”±æ¡ç›®æ•°é‡é…ç½®
 
-#define LWNS_NEIGHBOR_MAX_NUM           8       //×î´óÁÚ¾ÓÊýÁ¿
+#define LWNS_NEIGHBOR_MAX_NUM           8       //æœ€å¤§é‚»å±…æ•°é‡
 
 #endif /* _LWNS_CONFIG_H_ */

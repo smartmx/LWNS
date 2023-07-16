@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/06/20
- * Description        : lwns����������ʹ��macЭ�飬��͸��
+ * Description        : lwns适配器，不使用mac协议，纯透传
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
@@ -16,7 +16,7 @@ extern "C" {
 
 #include "lwns_config.h"
 
-#define LWNS_USE_NO_MAC    0  //�Ƿ�ʹ�ܴ�͸��macЭ�飬�ʺϲ����ڲ���������������磬�������ʴӻ�����������硣
+#define LWNS_USE_NO_MAC    0  //是否使能纯透传mac协议，适合不存在并发情况的星型网络，即主机问从机答的星型网络。
 
 #if LWNS_USE_NO_MAC
 
@@ -26,11 +26,11 @@ typedef enum
     BLE_PHY_MANAGE_STATE_SENDING,
 } BLE_PHY_MANAGE_STATE_t;
 
-  #define LLE_MODE_ORIGINAL_RX          (0x80) //�������LLEMODEʱ���ϴ˺꣬����յ�һ�ֽ�Ϊԭʼ���ݣ�ԭ��ΪRSSI��
+  #define LLE_MODE_ORIGINAL_RX          (0x80) //如果配置LLEMODE时加上此宏，则接收第一字节为原始数据（原来为RSSI）
 
-  #define LWNS_HTIMER_PERIOD_MS         20    //Ϊ(1000/HTIMER_SECOND_NUM)
+  #define LWNS_HTIMER_PERIOD_MS         20    //为(1000/HTIMER_SECOND_NUM)
 
-    //RF_TX��RF_RX���õ����ͣ������޸ģ����Ƽ���
+    //RF_TX和RF_RX所用的类型，可以修改，不推荐改
   #define USER_RF_RX_TX_TYPE            0xff
 
   #define LWNS_PHY_OUTPUT_TIMEOUT_MS    5

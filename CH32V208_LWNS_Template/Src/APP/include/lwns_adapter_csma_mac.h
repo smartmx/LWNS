@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/06/20
- * Description        : lwns��������ģ��csma��macЭ��
+ * Description        : lwns适配器，模拟csma的mac协议
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
@@ -16,7 +16,7 @@ extern "C" {
 
 #include "lwns_config.h"
 
-#define LWNS_USE_CSMA_MAC    0  //�Ƿ�ʹ��ģ��csma��macЭ�飬ע��ֻ��ʹ��һ��mac��Э�顣
+#define LWNS_USE_CSMA_MAC    0  //是否使能模仿csma的mac协议，注意只能使能一个mac层协议。
 
 #if LWNS_USE_CSMA_MAC
 
@@ -24,7 +24,7 @@ struct csma_mac_phy_manage_struct
 {
     struct csma_mac_phy_manage_struct *next;
     uint8_t                           *data;
-}; //ģ��csma mac�㷢�͹����ṹ��
+}; //模拟csma mac层发送管理结构体
 
 typedef enum
 {
@@ -34,21 +34,21 @@ typedef enum
     BLE_PHY_MANAGE_STATE_SENDING,
 } BLE_PHY_MANAGE_STATE_t;
 
-  #define LWNS_MAC_TRANSMIT_TIMES          2                      //һ�η��ͣ�����Ӳ�����ͼ���
+  #define LWNS_MAC_TRANSMIT_TIMES          2                      //一次发送，调用硬件发送几次
 
-  #define LWNS_MAC_PERIOD_MS               20                     //mac���ͽ��ռ�����ڣ��������Ҫ���͵����ݰ�����ʼ����ӳټ���ͻ��//Ϊ(1000/HTIMER_SECOND_NUM)
+  #define LWNS_MAC_PERIOD_MS               20                     //mac发送接收检测周期，如果有需要发送的数据包，则开始随机延迟检测冲突。//为(1000/HTIMER_SECOND_NUM)
 
-  #define LWNS_MAC_SEND_DELAY_MAX_625US    LWNS_NEIGHBOR_MAX_NUM  //����ӳ٣���ֵԽС��Խ���׳��ִ����Ƽ���һЩ��8���Ը��ʻ����ԡ�
+  #define LWNS_MAC_SEND_DELAY_MAX_625US    LWNS_NEIGHBOR_MAX_NUM  //随机延迟，该值越小，越容易出现错误，推荐大一些，8测试概率还可以。
 
   #define BLE_PHY_ONE_PACKET_MAX_625US     5
 
-  #define LWNS_MAC_SEND_PACKET_MAX_NUM     8                      //�����������֧�ּ������ݰ��ȴ�����
+  #define LWNS_MAC_SEND_PACKET_MAX_NUM     8                      //发送链表最多支持几个数据包等待发送
 
-  #define LWNS_MAC_SEND_DELAY_MAX_TIMES    LWNS_NEIGHBOR_MAX_NUM / 2 //�ڷ��ͱ�ȡ�����ӳټ��κ󣬲�������ȴ������̷���
+  #define LWNS_MAC_SEND_DELAY_MAX_TIMES    LWNS_NEIGHBOR_MAX_NUM / 2 //在发送被取消，延迟几次后，不再随机等待，立刻发送
 
-  #define LLE_MODE_ORIGINAL_RX             (0x80) //�������LLEMODEʱ���ϴ˺꣬����յ�һ�ֽ�Ϊԭʼ���ݣ�ԭ��ΪRSSI��
+  #define LLE_MODE_ORIGINAL_RX             (0x80) //如果配置LLEMODE时加上此宏，则接收第一字节为原始数据（原来为RSSI）
 
-    //RF_TX��RF_RX���õ����ͣ������޸ģ����Ƽ���
+    //RF_TX和RF_RX所用的类型，可以修改，不推荐改
   #define USER_RF_RX_TX_TYPE               0xff
 
   #define LWNS_PHY_OUTPUT_TIMEOUT_MS       5

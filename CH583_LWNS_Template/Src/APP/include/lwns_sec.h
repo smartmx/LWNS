@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/09/17
- * Description        : lwnsÏûÏ¢¼ÓÃÜ
+ * Description        : lwnsæ¶ˆæ¯åŠ å¯†
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/

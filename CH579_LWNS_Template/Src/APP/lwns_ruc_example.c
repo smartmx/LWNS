@@ -1,14 +1,14 @@
 /*
  * lwns_ruc_example.c
- * ¿É¿¿µ¥²¥´«ÊäÀı×Ó
+ * å¯é å•æ’­ä¼ è¾“ä¾‹å­
  * reliable unicast
- * Ê¹ÓÃĞèÒªÈ¥app_main.cÖĞÈ¡Ïû±¾Àı×Ó³õÊ¼»¯º¯ÊıµÄ×¢ÊÍ
+ * ä½¿ç”¨éœ€è¦å»app_main.cä¸­å–æ¶ˆæœ¬ä¾‹å­åˆå§‹åŒ–å‡½æ•°çš„æ³¨é‡Š
  * Created on: Jul 19, 2021
  * Author: WCH
  */
 #include "lwns_ruc_example.h"
 
-//Ã¿¸öÎÄ¼şµ¥¶Àdebug´òÓ¡µÄ¿ª¹Ø£¬ÖÃ0¿ÉÒÔ½ûÖ¹±¾ÎÄ¼şÄÚ²¿´òÓ¡
+//æ¯ä¸ªæ–‡ä»¶å•ç‹¬debugæ‰“å°çš„å¼€å…³ï¼Œç½®0å¯ä»¥ç¦æ­¢æœ¬æ–‡ä»¶å†…éƒ¨æ‰“å°
 #define DEBUG_PRINT_IN_THIS_FILE 1
 #if DEBUG_PRINT_IN_THIS_FILE
 #define PRINTF(...) PRINT(__VA_ARGS__)
@@ -17,12 +17,12 @@
 #endif
 
 #if 1
-static lwns_addr_t dst_addr = { { 0xa3, 0xdf, 0x38, 0xe4, 0xc2, 0x84 } };//Ä¿±ê½ÚµãµØÖ·£¬²âÊÔÊ±£¬Çë¸ù¾İµçÂ·°åĞ¾Æ¬MACµØÖ·²»Í¬½øĞĞĞŞ¸Ä¡£ĞŞ¸ÄÎª½ÓÊÕ·½µÄMACµØÖ·£¬ÇëÎğÊ¹ÓÃ×Ô¼ºµÄMACµØÖ·
+static lwns_addr_t dst_addr = { { 0xa3, 0xdf, 0x38, 0xe4, 0xc2, 0x84 } };//ç›®æ ‡èŠ‚ç‚¹åœ°å€ï¼Œæµ‹è¯•æ—¶ï¼Œè¯·æ ¹æ®ç”µè·¯æ¿èŠ¯ç‰‡MACåœ°å€ä¸åŒè¿›è¡Œä¿®æ”¹ã€‚ä¿®æ”¹ä¸ºæ¥æ”¶æ–¹çš„MACåœ°å€ï¼Œè¯·å‹¿ä½¿ç”¨è‡ªå·±çš„MACåœ°å€
 #else
 static lwns_addr_t dst_addr = { { 0xd9, 0x37, 0x3c, 0xe4, 0xc2, 0x84 } };
 #endif
 
-static lwns_ruc_controller ruc;//ÉùÃ÷¿É¿¿µ¥²¥¿ØÖÆ½á¹¹Ìå
+static lwns_ruc_controller ruc;//å£°æ˜å¯é å•æ’­æ§åˆ¶ç»“æ„ä½“
 
 static uint8_t TX_DATA[10] =
         { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39 };
@@ -44,20 +44,20 @@ static void timedout_ruc(lwns_controller_ptr ptr,
 /*********************************************************************
  * @fn      recv_ruc
  *
- * @brief   lwns ruc½ÓÊÕ»Øµ÷º¯Êı
+ * @brief   lwns rucæ¥æ”¶å›è°ƒå‡½æ•°
  *
- * @param   ptr     -   ±¾´Î½ÓÊÕµ½µÄÊı¾İËùÊôµÄ¿É¿¿µ¥²¥¿ØÖÆ½á¹¹ÌåÖ¸Õë.
- * @param   sender  -   ±¾´Î½ÓÊÕµ½µÄÊı¾İµÄ·¢ËÍÕßµØÖ·Ö¸Õë.
+ * @param   ptr     -   æœ¬æ¬¡æ¥æ”¶åˆ°çš„æ•°æ®æ‰€å±çš„å¯é å•æ’­æ§åˆ¶ç»“æ„ä½“æŒ‡é’ˆ.
+ * @param   sender  -   æœ¬æ¬¡æ¥æ”¶åˆ°çš„æ•°æ®çš„å‘é€è€…åœ°å€æŒ‡é’ˆ.
  *
  * @return  None.
  */
 static void recv_ruc(lwns_controller_ptr ptr,
         const lwns_addr_t* sender) {
-    //rucÖĞ½ÓÊÕµ½·¢ËÍ¸ø×Ô¼ºµÄÊı¾İºó£¬²Å»áµ÷ÓÃ¸Ã»Øµ÷
+    //rucä¸­æ¥æ”¶åˆ°å‘é€ç»™è‡ªå·±çš„æ•°æ®åï¼Œæ‰ä¼šè°ƒç”¨è¯¥å›è°ƒ
     uint8_t len;
-    len = lwns_buffer_datalen(); //»ñÈ¡µ±Ç°»º³åÇø½ÓÊÕµ½µÄÊı¾İ³¤¶È
+    len = lwns_buffer_datalen(); //è·å–å½“å‰ç¼“å†²åŒºæ¥æ”¶åˆ°çš„æ•°æ®é•¿åº¦
     if (len == 10) {
-        lwns_buffer_save_data(RX_DATA); //½ÓÊÕÊı¾İµ½ÓÃ»§Êı¾İÇøÓò
+        lwns_buffer_save_data(RX_DATA); //æ¥æ”¶æ•°æ®åˆ°ç”¨æˆ·æ•°æ®åŒºåŸŸ
         PRINTF("ruc %d rec %02x %02x %02x %02x %02x %02x\r\n",get_lwns_object_port(ptr), sender->v8[0],
                 sender->v8[1], sender->v8[2], sender->v8[3], sender->v8[4], sender->v8[5]);
         PRINTF("data:");
@@ -73,47 +73,47 @@ static void recv_ruc(lwns_controller_ptr ptr,
 /*********************************************************************
  * @fn      sent_ruc
  *
- * @brief   lwns ruc·¢ËÍÍê³É»Øµ÷º¯Êı
+ * @brief   lwns rucå‘é€å®Œæˆå›è°ƒå‡½æ•°
  *
- * @param   ptr     -   ±¾´Î·¢ËÍÍê³ÉµÄ¿É¿¿µ¥²¥¿ØÖÆ½á¹¹ÌåÖ¸Õë.
+ * @param   ptr     -   æœ¬æ¬¡å‘é€å®Œæˆçš„å¯é å•æ’­æ§åˆ¶ç»“æ„ä½“æŒ‡é’ˆ.
  *
  * @return  None.
  */
 static void sent_ruc(lwns_controller_ptr ptr,
         const lwns_addr_t* to, uint8_t retransmissions) {
-    //rucÖĞ·¢ËÍ³É¹¦£¬²¢ÇÒÊÕµ½Ä¿±ê½ÚµãµÄack»Ø¸´ºó£¬²Å»áµ÷ÓÃ¸Ã»Øµ÷
+    //rucä¸­å‘é€æˆåŠŸï¼Œå¹¶ä¸”æ”¶åˆ°ç›®æ ‡èŠ‚ç‚¹çš„ackå›å¤åï¼Œæ‰ä¼šè°ƒç”¨è¯¥å›è°ƒ
     PRINTF("ruc %d sent %d\r\n",get_lwns_object_port(ptr),retransmissions);
     tmos_start_task(ruc_taskID, RUC_EXAMPLE_TX_PERIOD_EVT,
-                    MS1_TO_SYSTEM_TIME(1000));//¸üĞÂÈÎÎñÊ±¼ä£¬·¢ËÍ²¢ÊÕµ½»Ø¸´ºó£¬1ÃëÖÓºóÔÙ·¢ËÍ
+                    MS1_TO_SYSTEM_TIME(1000));//æ›´æ–°ä»»åŠ¡æ—¶é—´ï¼Œå‘é€å¹¶æ”¶åˆ°å›å¤åï¼Œ1ç§’é’Ÿåå†å‘é€
 }
 
 /*********************************************************************
  * @fn      timedout_ruc
  *
- * @brief   lwns ruc·¢ËÍ³¬Ê±»Øµ÷º¯Êı
+ * @brief   lwns rucå‘é€è¶…æ—¶å›è°ƒå‡½æ•°
  *
- * @param   ptr     -   ±¾´Î·¢ËÍÍê³ÉµÄruc¿ØÖÆ½á¹¹ÌåÖ¸Õë.
+ * @param   ptr     -   æœ¬æ¬¡å‘é€å®Œæˆçš„rucæ§åˆ¶ç»“æ„ä½“æŒ‡é’ˆ.
  *
  * @return  None.
  */
 static void timedout_ruc(lwns_controller_ptr ptr,
         const lwns_addr_t* to) {
-    //rucÖĞ£¬ÔÙÖØ·¢´ÎÊı³¬¹ı×î´óÖØ·¢´ÎÊıºó£¬»áµ÷ÓÃ¸Ã»Øµ÷¡£
+    //rucä¸­ï¼Œå†é‡å‘æ¬¡æ•°è¶…è¿‡æœ€å¤§é‡å‘æ¬¡æ•°åï¼Œä¼šè°ƒç”¨è¯¥å›è°ƒã€‚
     PRINTF("ruc %d timedout\n",get_lwns_object_port(ptr));
     tmos_start_task(ruc_taskID, RUC_EXAMPLE_TX_PERIOD_EVT,
                     MS1_TO_SYSTEM_TIME(1000));
 }
 
 /**
- * lwns ¿É¿¿µ¥²¥»Øµ÷º¯Êı½á¹¹Ìå£¬×¢²á»Øµ÷º¯Êı
+ * lwns å¯é å•æ’­å›è°ƒå‡½æ•°ç»“æ„ä½“ï¼Œæ³¨å†Œå›è°ƒå‡½æ•°
  */
 static const struct lwns_ruc_callbacks ruc_callbacks = {
-        recv_ruc, sent_ruc, timedout_ruc };//ÉùÃ÷¿É¿¿µ¥²¥»Øµ÷½á¹¹Ìå
+        recv_ruc, sent_ruc, timedout_ruc };//å£°æ˜å¯é å•æ’­å›è°ƒç»“æ„ä½“
 
 /*********************************************************************
  * @fn      lwns_ruc_process_init
  *
- * @brief   lwns rucÀı³Ì³õÊ¼»¯.
+ * @brief   lwns rucä¾‹ç¨‹åˆå§‹åŒ–.
  *
  * @param   None.
  *
@@ -121,9 +121,9 @@ static const struct lwns_ruc_callbacks ruc_callbacks = {
  */
 void lwns_ruc_process_init(void) {
     lwns_ruc_init(&ruc,
-            144,//´ò¿ªÒ»¸ö¶Ë¿ÚºÅÎª144µÄ¿É¿¿µ¥²¥
-            HTIMER_SECOND_NUM,//µÈ´ıackÊ±¼ä¼ä¸ô£¬Ã»ÊÕµ½¾Í»áÖØ·¢
-            &ruc_callbacks);//·µ»Ø0´ú±í´ò¿ªÊ§°Ü¡£·µ»Ø1´ò¿ª³É¹¦¡£
+            144,//æ‰“å¼€ä¸€ä¸ªç«¯å£å·ä¸º144çš„å¯é å•æ’­
+            HTIMER_SECOND_NUM,//ç­‰å¾…ackæ—¶é—´é—´éš”ï¼Œæ²¡æ”¶åˆ°å°±ä¼šé‡å‘
+            &ruc_callbacks);//è¿”å›0ä»£è¡¨æ‰“å¼€å¤±è´¥ã€‚è¿”å›1æ‰“å¼€æˆåŠŸã€‚
     ruc_taskID = TMOS_ProcessEventRegister(lwns_ruc_ProcessEvent);
     tmos_start_task(ruc_taskID, RUC_EXAMPLE_TX_PERIOD_EVT,
                 MS1_TO_SYSTEM_TIME(1000));
@@ -147,14 +147,14 @@ uint16_t lwns_ruc_ProcessEvent(uint8_t task_id, uint16_t events) {
         uint8_t temp;
         temp = TX_DATA[0];
         for (uint8_t i = 0; i < 9; i++) {
-            TX_DATA[i] = TX_DATA[i + 1];//ÒÆÎ»·¢ËÍÊı¾İ£¬ÒÔ±ã¹Û²ìĞ§¹û
+            TX_DATA[i] = TX_DATA[i + 1];//ç§»ä½å‘é€æ•°æ®ï¼Œä»¥ä¾¿è§‚å¯Ÿæ•ˆæœ
         }
         TX_DATA[9] = temp;
-        lwns_buffer_load_data(TX_DATA, sizeof(TX_DATA));//ÔØÈëĞèÒª·¢ËÍµÄÊı¾İµ½»º³åÇø
+        lwns_buffer_load_data(TX_DATA, sizeof(TX_DATA));//è½½å…¥éœ€è¦å‘é€çš„æ•°æ®åˆ°ç¼“å†²åŒº
         lwns_ruc_send(&ruc,
-                &dst_addr,//¿É¿¿µ¥²¥Ä¿±êµØÖ·
-                4//×î´óÖØ·¢´ÎÊı
-                );//¿É¿¿µ¥²¥·¢ËÍº¯Êı£º·¢ËÍ²ÎÊı£¬Ä¿±êµØÖ·£¬×î´óÖØ·¢´ÎÊı£¬Ä¬ÈÏÒ»ÃëÖÓÖØ·¢Ò»´Î
+                &dst_addr,//å¯é å•æ’­ç›®æ ‡åœ°å€
+                4//æœ€å¤§é‡å‘æ¬¡æ•°
+                );//å¯é å•æ’­å‘é€å‡½æ•°ï¼šå‘é€å‚æ•°ï¼Œç›®æ ‡åœ°å€ï¼Œæœ€å¤§é‡å‘æ¬¡æ•°ï¼Œé»˜è®¤ä¸€ç§’é’Ÿé‡å‘ä¸€æ¬¡
         return events ^ RUC_EXAMPLE_TX_PERIOD_EVT;
     }
     if (events & SYS_EVENT_MSG) {

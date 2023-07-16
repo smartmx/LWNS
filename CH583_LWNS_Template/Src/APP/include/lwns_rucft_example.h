@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/06/30
- * Description        : reliable unicast file transfer£¬¿É¿¿µ¥²¥ÎÄ¼ş´«ÊäÀı×Ó
+ * Description        : reliable unicast file transferï¼Œå¯é å•æ’­æ–‡ä»¶ä¼ è¾“ä¾‹å­
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/

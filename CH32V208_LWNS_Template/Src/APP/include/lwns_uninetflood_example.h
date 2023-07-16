@@ -3,7 +3,7 @@
  * Author             : WCH
  * Version            : V1.0
  * Date               : 2021/10/25
- * Description        : lwns单播网络泛洪传输例子，将数据网络泛洪发送至指定节点
+ * Description        : lwns鍗曟挱缃戠粶娉涙椽浼犺緭渚嬪瓙锛屽皢鏁版嵁缃戠粶娉涙椽鍙戦�佽嚦鎸囧畾鑺傜偣
  * Copyright (c) 2021 Nanjing Qinheng Microelectronics Co., Ltd.
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
